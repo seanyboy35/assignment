@@ -5,7 +5,7 @@ import { UserManagementComponent } from './user-managment/user-managment.compone
 import { ChatComponent } from './chat/chat.component';
 import { GroupManagementComponent } from './group-management/group-management.component';
 
-const routes: Routes = [
+export const routes: Routes = [
   { path: '', component: VideoChatComponent },
   { path: 'dashboard', component: UserManagementComponent },
   { path: 'chat', component: ChatComponent },

@@ -1,6 +1,6 @@
 // src/app/video-chat/video-chat.component.ts
 import { Component, OnInit } from '@angular/core';
-import * as Peer from 'peerjs';
+import Peer from 'peerjs';
 
 @Component({
   selector: 'app-video-chat',
