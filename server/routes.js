@@ -3,16 +3,18 @@ const express = require('express');
 const { User, Group, Channel } = require('./models');
 const router = express.Router();
 
-// Define routes for user, group, and channel operations
 // User Routes
 router.get('/users', async (req, res) => {
   const users = await User.find();
   res.json(users);
-@@ -14,6 +15,28 @@ router.post('/users', async (req, res) => {
+});
+
+router.post('/users', async (req, res) => {
+  const user = new User(req.body);
+  await user.save();
   res.json(user);
 });
 
-// Add more routes for Groups and Channels
 // Group Routes
 router.get('/groups', async (req, res) => {
   const groups = await Group.find().populate('admins').populate('channels');
