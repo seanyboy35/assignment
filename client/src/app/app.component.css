@@ -1,0 +1,86 @@
+/* Global Styles /
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f2f5;
+    color: #333;
+  }
+
+  / App Container /
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  / Header Section /
+  .app-header {
+    background-color: #007bff;
+    padding: 20px;
+    color: #fff;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+
+  .navbar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .navbar li {
+    display: inline;
+  }
+
+  .navbar a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .navbar a:hover {
+    text-decoration: underline;
+  }
+
+  / Main Content Section /
+  .main-content {
+    flex: 1;
+    padding: 20px;
+    background-color: #fff;
+  }
+
+  / Sections Styling /
+  section {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #e9ecef;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  / Individual Section Styling /
+  .home-section, .chat-section, .group-management-section, .user-management-section, .video-chat-section {
+    margin-bottom: 30px;
+  }
+
+  section h2 {
+    margin-top: 0;
+    color: #007bff;
+  }
+
+  / Footer Section */
+  .app-footer {
+    background-color: #007bff;
+    color: #fff;
+    text-align: center;
+    padding: 15px 0;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+  }

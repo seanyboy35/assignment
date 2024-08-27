@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { VideoChatComponent } from './video-chat.component';
 
 describe('VideoChatComponent', () => {
@@ -8,9 +7,8 @@ describe('VideoChatComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [VideoChatComponent]
-    })
-    .compileComponents();
+      imports: [VideoChatComponent] // Use VideoChatComponent in imports for standalone
+    }).compileComponents();
 
     fixture = TestBed.createComponent(VideoChatComponent);
     component = fixture.componentInstance;
