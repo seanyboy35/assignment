@@ -1,6 +1,3 @@
-video-chat.component.ts
-
-
 import { Component, OnInit } from '@angular/core';
 import Peer from 'peerjs';
 
