@@ -16,34 +16,34 @@
   <!-- Main Content Section -->
   <main class="main-content">
     <!-- Home Section -->
-    <section [@If]="currentSection === 'home'" class="home-section">
+    <section *ngIf="currentSection === 'home'" class="home-section">
       <h2>Welcome to the App</h2>
       <p>Use the navigation above to access different features of the application.</p>
     </section>
 
     <!-- Chat Section -->
-    <section [@If]="currentSection === 'chat'" class="chat-section">
+    <section *ngIf="currentSection === 'chat'" class="chat-section">
       <h2>Chat</h2>
       <!-- Placeholder for Chat Component -->
       <app-chat></app-chat>
     </section>
 
     <!-- Group Management Section -->
-    <section [@If]="currentSection === 'group-management'" class="group-management-section">
+    <section *ngIf="currentSection === 'group-management'" class="group-management-section">
       <h2>Group Management</h2>
       <!-- Placeholder for Group Management Component -->
       <app-group-management></app-group-management>
     </section>
 
     <!-- User Management Section -->
-    <section [@If]="currentSection === 'user-management'" class="user-management-section">
+    <section *ngIf="currentSection === 'user-management'" class="user-management-section">
       <h2>User Management</h2>
       <!-- Placeholder for User Management Component -->
       <app-user-management></app-user-management>
     </section>
 
     <!-- Video Chat Section -->
-    <section [@If]="currentSection === 'video-chat'" class="video-chat-section">
+    <section *ngIf="currentSection === 'video-chat'" class="video-chat-section">
       <h2>Video Chat</h2>
       <!-- Placeholder for Video Chat Component -->
       <app-video-chat></app-video-chat>
@@ -55,3 +55,4 @@
     <p>&copy; 2024 {{ companyName }}. All rights reserved.</p>
   </footer>
 </div>
+
