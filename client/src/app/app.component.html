@@ -34,6 +34,29 @@
       <p *ngIf="loginError" class="error">{{ loginError }}</p>
     </section>
 
+    <!-- Super Admin Dashboard -->
+    <section *ngIf="isAuthenticated && userRole === 'superAdmin'" class="super-admin-section">
+      <h2>Super Admin Dashboard</h2>
+      <button (click)="createUser()">Create User</button>
+      <button (click)="deleteUser()">Delete User</button>
+      <button (click)="promoteUser()">Promote User</button>
+    </section>
+
+    <!-- Group Admin Dashboard -->
+    <section *ngIf="isAuthenticated && userRole === 'groupAdmin'" class="group-admin-section">
+      <h2>Group Admin Dashboard</h2>
+      <button (click)="createGroup()">Create Group</button>
+      <button (click)="createChannel()">Create Channel</button>
+      <button (click)="removeGroup()">Remove Group</button>
+    </section>
+
+    <!-- Chat User Dashboard -->
+    <section *ngIf="isAuthenticated && userRole === 'chatUser'" class="chat-user-section">
+      <h2>Chat User Dashboard</h2>
+      <button (click)="joinChannel()">Join Channel</button>
+      <button (click)="leaveGroup()">Leave Group</button>
+    </section>
+
     <!-- Home Section -->
     <section *ngIf="isAuthenticated && currentSection === 'home'" class="home-section">
       <h2>Welcome to the App</h2>

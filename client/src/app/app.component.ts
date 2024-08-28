@@ -26,6 +26,7 @@ export class AppComponent {
   companyName: string = 'Your Company Name';
   currentSection: string = 'home';
   isAuthenticated: boolean = false;
+  userRole: 'superAdmin' | 'groupAdmin' | 'chatUser' | null = null;
   username: string = '';
   password: string = '';
   loginError: string | null = null;
@@ -37,17 +38,62 @@ export class AppComponent {
   login() {
     if (this.username === 'super' && this.password === '123') {
       this.isAuthenticated = true;
+      this.userRole = 'superAdmin';
       this.loginError = null;
-      this.navigateTo('home'); // Redirect to home after successful login
+    } else if (this.username === 'groupAdmin' && this.password === '123') {
+      this.isAuthenticated = true;
+      this.userRole = 'groupAdmin';
+      this.loginError = null;
+    } else if (this.username === 'chatUser' && this.password === '123') {
+      this.isAuthenticated = true;
+      this.userRole = 'chatUser';
+      this.loginError = null;
     } else {
       this.loginError = 'Invalid username or password. Please try again.';
     }
+    this.navigateTo('home'); // Redirect to home after successful login
   }
 
   logout() {
     this.isAuthenticated = false;
+    this.userRole = null;
     this.username = '';
     this.password = '';
     this.navigateTo('home'); // Redirect to home after logout
+  }
+
+  // Super Admin methods
+  createUser() {
+    console.log('Create User clicked');
+  }
+
+  deleteUser() {
+    console.log('Delete User clicked');
+  }
+
+  promoteUser() {
+    console.log('Promote User clicked');
+  }
+
+  // Group Admin methods
+  createGroup() {
+    console.log('Create Group clicked');
+  }
+
+  createChannel() {
+    console.log('Create Channel clicked');
+  }
+
+  removeGroup() {
+    console.log('Remove Group clicked');
+  }
+
+  // Chat User methods
+  joinChannel() {
+    console.log('Join Channel clicked');
+  }
+
+  leaveGroup() {
+    console.log('Leave Group clicked');
   }
 }
