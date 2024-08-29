@@ -31,8 +31,21 @@ export class AppComponent {
   loginError: string | null = null;
   userRole: string = ''; // Added to manage user roles
 
-  groups: string[] = []; // Array to store created groups
-  channels: string[] = []; // Array to store created channels
+  // Updated to store groups and their associated channels
+  groups: { name: string, channels: string[], members: string[], requests: string[] }[] = [];
+  chatUser: { username: string, groups: string[] } | null = null; // Stores the chat user's info
+
+  constructor() {
+    this.initializeGroups(); // Initialize groups and other data
+  }
+
+  initializeGroups() {
+    // Sample groups initialized for demonstration
+    this.groups = [
+      { name: 'Group 1', channels: ['Channel 1 of Group 1'], members: [], requests: [] },
+      { name: 'Group 2', channels: ['Channel 1 of Group 2'], members: [], requests: [] }
+    ];
+  }
 
   navigateTo(section: string) {
     this.currentSection = section;
@@ -44,14 +57,15 @@ export class AppComponent {
       this.userRole = 'superAdmin'; // Set role for Super Admin
       this.loginError = null;
       this.navigateTo('home'); // Redirect to home after successful login
-    } else if (this.username === 'groupAdmin' && this.password === '123') {
+    } else if (this.username === 'group' && this.password === '123') {
       this.isAuthenticated = true;
       this.userRole = 'groupAdmin'; // Set role for Group Admin
       this.loginError = null;
       this.navigateTo('home'); // Redirect to home after successful login
-    } else if (this.username === 'chatUser' && this.password === '123') {
+    } else if (this.username === 'chat' && this.password === '123') {
       this.isAuthenticated = true;
       this.userRole = 'chatUser'; // Set role for Chat User
+      this.chatUser = { username: `ChatUser_${Math.floor(Math.random() * 1000)}`, groups: [] };
       this.loginError = null;
       this.navigateTo('home'); // Redirect to home after successful login
     } else {
@@ -64,59 +78,101 @@ export class AppComponent {
     this.username = '';
     this.password = '';
     this.userRole = ''; // Reset user role on logout
+    this.chatUser = null; // Reset chat user info
     this.navigateTo('home'); // Redirect to home after logout
   }
 
   // Group Management functions
   createGroup() {
     const newGroupName = `Group ${this.groups.length + 1}`;
-    this.groups.push(newGroupName);
+    this.groups.push({ name: newGroupName, channels: [], members: [], requests: [] });
     console.log('Creating group...', newGroupName);
   }
 
-  createChannel() {
-    const newChannelName = `Channel ${this.channels.length + 1}`;
-    this.channels.push(newChannelName);
-    console.log('Creating channel...', newChannelName);
-  }
-
-  removeGroup() {
-    if (this.groups.length > 0) {
-      const removedGroup = this.groups.pop(); // Remove the last group
-      console.log('Removing group...', removedGroup);
-    } else {
-      console.log('No groups to remove.');
+  createChannel(groupName: string) {
+    const group = this.groups.find(g => g.name === groupName);
+    if (group) {
+      const newChannelName = `Channel ${group.channels.length + 1} of ${groupName}`;
+      group.channels.push(newChannelName);
+      console.log('Creating channel:', newChannelName);
     }
   }
 
-  removeChannel() {
-    if (this.channels.length > 0) {
-      const removedChannel = this.channels.pop(); // Remove the last channel
-      console.log('Removing channel...', removedChannel);
-    } else {
-      console.log('No channels to remove.');
-    }
-  }
-
-  // User Management functions
   createUser() {
-    console.log('Creating user...');
+    // Logic to create a user
+    console.log('Creating a new user...');
   }
 
   deleteUser() {
+    // Logic to delete a user
     console.log('Deleting user...');
   }
 
   promoteUser() {
+    // Logic to promote a user
     console.log('Promoting user...');
   }
 
-  // Chat User functions
-  joinChannel() {
-    console.log('Joining channel...');
+  removeGroup(groupName: string) {
+    this.groups = this.groups.filter(g => g.name !== groupName);
+    console.log('Removing group:', groupName);
   }
 
-  leaveGroup() {
-    console.log('Leaving group...');
+  removeChannel(groupName: string, channelName: string) {
+    const group = this.groups.find(g => g.name === groupName);
+    if (group) {
+      group.channels = group.channels.filter(c => c !== channelName);
+      console.log('Removing channel:', channelName, 'from', groupName);
+    }
+  }
+
+  // Chat User Functions
+  joinGroupRequest(groupName: string) {
+    const group = this.groups.find(g => g.name === groupName);
+    if (group && this.chatUser) {
+      group.requests.push(this.chatUser.username);
+      console.log('Requesting to join group:', groupName);
+    }
+  }
+
+  leaveGroup(groupName: string) {
+  if (this.chatUser) {
+    this.chatUser.groups = this.chatUser.groups.filter(g => g !== groupName);
+    const group = this.groups.find(g => g.name === groupName);
+    if (group) {
+      group.members = group.members.filter(m => m !== this.chatUser?.username);
+      console.log('Leaving group:', groupName);
+    }
+  }
+}
+
+
+  deleteAccount() {
+    if (this.chatUser) {
+      if (confirm('Are you sure you want to delete your account?')) {
+        console.log('Deleting account for user:', this.chatUser.username);
+        this.logout();
+      } else {
+        console.log('Account deletion cancelled.');
+      }
+    }
+  }
+
+  // Admin Functions to Approve/Deny Requests
+  approveRequest(groupName: string, username: string) {
+    const group = this.groups.find(g => g.name === groupName);
+    if (group) {
+      group.requests = group.requests.filter(r => r !== username);
+      group.members.push(username);
+      console.log('Approved request for user:', username, 'to join group:', groupName);
+    }
+  }
+
+  denyRequest(groupName: string, username: string) {
+    const group = this.groups.find(g => g.name === groupName);
+    if (group) {
+      group.requests = group.requests.filter(r => r !== username);
+      console.log('Denied request for user:', username, 'to join group:', groupName);
+    }
   }
 }

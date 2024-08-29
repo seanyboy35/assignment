@@ -36,40 +36,85 @@
 
     <!-- Home Section -->
     <section *ngIf="isAuthenticated && currentSection === 'home'" class="home-section">
-      <h2>Welcome to the App</h2>
+      <h2>Welcome to the Home Page</h2>
       <p>Use the navigation above to access different features of the application.</p>
+      
+      <!-- Chat User Specific Content -->
+      <div *ngIf="userRole === 'chatUser'">
+        <h3>Available Groups</h3>
+        <ul>
+          <li *ngFor="let group of groups">
+            {{ group.name }}
+            <button (click)="joinGroupRequest(group.name)" *ngIf="!chatUser?.groups?.includes(group.name)">Request to Join</button>
+            <button (click)="leaveGroup(group.name)" *ngIf="chatUser?.groups?.includes(group.name)">Leave Group</button>
+          <li *ngFor="let group of chatUser?.groups">{{ group }}</li>
+        </ul>
+      </div>
+
+      <!-- Admin view to manage group requests -->
+      <div *ngIf="userRole === 'superAdmin' || userRole === 'groupAdmin'">
+        <h3>Manage Group Requests</h3>
+        <ul *ngFor="let group of groups">
+          <li *ngFor="let request of group.requests">
+            {{ request }} requested to join {{ group.name }}
+            <button (click)="approveRequest(group.name, request)">Approve</button>
+            <button (click)="denyRequest(group.name, request)">Deny</button>
+          </li>
+        </ul>
+      </div>
     </section>
 
     <!-- Chat Section -->
-    <section *ngIf="isAuthenticated && currentSection === 'chat'" class="chat-section">
-      <h2>Chat</h2>
-      <app-chat></app-chat>
-    </section>
+<section *ngIf="isAuthenticated && currentSection === 'chat'" class="chat-section">
+  <h2>Chat Window</h2>
+  <div *ngIf="userRole === 'chatUser'">
+    <h3>Your Groups</h3>
+    <ul>
+      <li *ngFor="let group of chatUser?.groups">{{ group }}</li>
+    </ul>
+    <button (click)="deleteAccount()">Delete Account</button>
+  </div>
+</section>
 
     <!-- Group Management Section -->
     <section *ngIf="isAuthenticated && currentSection === 'group-management'" class="group-management-section">
       <h2>Group Management</h2>
+      
+      <!-- Display for Group Admin and Super Admin -->
       <div *ngIf="userRole === 'superAdmin' || userRole === 'groupAdmin'">
         <button (click)="createGroup()">Create Group</button>
-        <button (click)="createChannel()">Create Channel</button>
-        <button (click)="removeGroup()">Remove Group</button>
-        <button (click)="removeChannel()">Remove Channel</button>
 
         <!-- Display Created Groups -->
         <div *ngIf="groups.length > 0" class="groups-list">
           <h3>Groups:</h3>
           <ul>
-            <li *ngFor="let group of groups">{{ group }}</li>
+            <li *ngFor="let group of groups">
+              {{ group.name }}
+              <button (click)="createChannel(group.name)">Create Channel</button>
+              <button (click)="removeGroup(group.name)">Remove Group</button>
+              <ul *ngIf="group.channels.length > 0">
+                <li *ngFor="let channel of group.channels">
+                  {{ channel }}
+                  <button (click)="removeChannel(group.name, channel)">Remove Channel</button>
+                </li>
+              </ul>
+            </li>
           </ul>
         </div>
+      </div>
 
-        <!-- Display Created Channels -->
-        <div *ngIf="channels.length > 0" class="channels-list">
-          <h3>Channels:</h3>
-          <ul>
-            <li *ngFor="let channel of channels">{{ channel }}</li>
-          </ul>
-        </div>
+      <!-- Display for Chat User -->
+      <div *ngIf="userRole === 'chatUser'">
+        <h3>Available Groups:</h3>
+        <ul *ngIf="groups.length > 0">
+          <li *ngFor="let group of groups">
+            {{ group.name }}
+            <ul *ngIf="group.channels.length > 0">
+              <li *ngFor="let channel of group.channels">{{ channel }}</li>
+            </ul>
+          </li>
+        </ul>
+        <p *ngIf="groups.length === 0">No groups available to view.</p>
       </div>
     </section>
 
