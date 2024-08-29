@@ -26,10 +26,13 @@ export class AppComponent {
   companyName: string = 'Your Company Name';
   currentSection: string = 'home';
   isAuthenticated: boolean = false;
-  userRole: 'superAdmin' | 'groupAdmin' | 'chatUser' | null = null;
   username: string = '';
   password: string = '';
   loginError: string | null = null;
+  userRole: string = ''; // Added to manage user roles
+
+  groups: string[] = []; // Array to store created groups
+  channels: string[] = []; // Array to store created channels
 
   navigateTo(section: string) {
     this.currentSection = section;
@@ -38,62 +41,82 @@ export class AppComponent {
   login() {
     if (this.username === 'super' && this.password === '123') {
       this.isAuthenticated = true;
-      this.userRole = 'superAdmin';
+      this.userRole = 'superAdmin'; // Set role for Super Admin
       this.loginError = null;
+      this.navigateTo('home'); // Redirect to home after successful login
     } else if (this.username === 'groupAdmin' && this.password === '123') {
       this.isAuthenticated = true;
-      this.userRole = 'groupAdmin';
+      this.userRole = 'groupAdmin'; // Set role for Group Admin
       this.loginError = null;
+      this.navigateTo('home'); // Redirect to home after successful login
     } else if (this.username === 'chatUser' && this.password === '123') {
       this.isAuthenticated = true;
-      this.userRole = 'chatUser';
+      this.userRole = 'chatUser'; // Set role for Chat User
       this.loginError = null;
+      this.navigateTo('home'); // Redirect to home after successful login
     } else {
       this.loginError = 'Invalid username or password. Please try again.';
     }
-    this.navigateTo('home'); // Redirect to home after successful login
   }
 
   logout() {
     this.isAuthenticated = false;
-    this.userRole = null;
     this.username = '';
     this.password = '';
+    this.userRole = ''; // Reset user role on logout
     this.navigateTo('home'); // Redirect to home after logout
   }
 
-  // Super Admin methods
-  createUser() {
-    console.log('Create User clicked');
-  }
-
-  deleteUser() {
-    console.log('Delete User clicked');
-  }
-
-  promoteUser() {
-    console.log('Promote User clicked');
-  }
-
-  // Group Admin methods
+  // Group Management functions
   createGroup() {
-    console.log('Create Group clicked');
+    const newGroupName = `Group ${this.groups.length + 1}`;
+    this.groups.push(newGroupName);
+    console.log('Creating group...', newGroupName);
   }
 
   createChannel() {
-    console.log('Create Channel clicked');
+    const newChannelName = `Channel ${this.channels.length + 1}`;
+    this.channels.push(newChannelName);
+    console.log('Creating channel...', newChannelName);
   }
 
   removeGroup() {
-    console.log('Remove Group clicked');
+    if (this.groups.length > 0) {
+      const removedGroup = this.groups.pop(); // Remove the last group
+      console.log('Removing group...', removedGroup);
+    } else {
+      console.log('No groups to remove.');
+    }
   }
 
-  // Chat User methods
+  removeChannel() {
+    if (this.channels.length > 0) {
+      const removedChannel = this.channels.pop(); // Remove the last channel
+      console.log('Removing channel...', removedChannel);
+    } else {
+      console.log('No channels to remove.');
+    }
+  }
+
+  // User Management functions
+  createUser() {
+    console.log('Creating user...');
+  }
+
+  deleteUser() {
+    console.log('Deleting user...');
+  }
+
+  promoteUser() {
+    console.log('Promoting user...');
+  }
+
+  // Chat User functions
   joinChannel() {
-    console.log('Join Channel clicked');
+    console.log('Joining channel...');
   }
 
   leaveGroup() {
-    console.log('Leave Group clicked');
+    console.log('Leaving group...');
   }
 }

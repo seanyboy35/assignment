@@ -53,6 +53,23 @@
         <button (click)="createGroup()">Create Group</button>
         <button (click)="createChannel()">Create Channel</button>
         <button (click)="removeGroup()">Remove Group</button>
+        <button (click)="removeChannel()">Remove Channel</button>
+
+        <!-- Display Created Groups -->
+        <div *ngIf="groups.length > 0" class="groups-list">
+          <h3>Groups:</h3>
+          <ul>
+            <li *ngFor="let group of groups">{{ group }}</li>
+          </ul>
+        </div>
+
+        <!-- Display Created Channels -->
+        <div *ngIf="channels.length > 0" class="channels-list">
+          <h3>Channels:</h3>
+          <ul>
+            <li *ngFor="let channel of channels">{{ channel }}</li>
+          </ul>
+        </div>
       </div>
     </section>
 
