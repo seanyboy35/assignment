@@ -1,28 +1,94 @@
 /* Global Styles */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f5f5; /* Light beige background */
   margin: 0;
   padding: 0;
-  background-color: #f0f2f5;
   color: #333;
 }
 
-/* App Container */
+h1, h2, h3 {
+  font-family: 'Montserrat', sans-serif; /* Better font for titles */
+  color: #333;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #ffffff; /* White background for login */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.login-form {
+  background-color: #f9f9f9; /* Slightly darker beige for form */
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+input[type="text"], input[type="password"] {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* General Button Style */
+button {
+  border: none;
+  padding: 0.5rem 1rem; /* Slightly smaller padding */
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem; /* Slightly smaller font size */
+}
+
+/* Request to Join Button */
+.request-to-join-btn {
+  background-color: #ff6f61; /* Coral color */
+  color: #fff;
+}
+
+.request-to-join-btn:hover {
+  background-color: #e55d50; /* Slightly darker coral on hover */
+}
+
+/* Leave Channel Button */
+.leave-channel-btn {
+  background-color: #4caf50; /* Green color */
+  color: #fff;
+}
+
+.leave-channel-btn:hover {
+  background-color: #45a049; /* Slightly darker green on hover */
+}
+
+/* Button Hover States */
+button:hover {
+  opacity: 0.9; /* Reduced opacity on hover */
+}
+
+.error {
+  color: #ff4d4d; /* Red color for errors */
+}
+
+/* Main App Container */
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
 }
 
-/* Header Section */
 .app-header {
-  background-color: #007bff;
-  padding: 20px;
+  background-color: #f7a072; /* Warm orange color */
   color: #fff;
+  padding: 1rem;
   text-align: center;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
 }
 
 .navbar ul {
@@ -31,11 +97,10 @@ body {
   margin: 0;
   display: flex;
   justify-content: center;
-  gap: 20px;
 }
 
 .navbar li {
-  display: inline;
+  margin: 0 1rem;
 }
 
 .navbar a {
@@ -48,39 +113,33 @@ body {
   text-decoration: underline;
 }
 
-/* Main Content Section */
 .main-content {
   flex: 1;
-  padding: 20px;
-  background-color: #fff;
+  padding: 1rem;
 }
 
-/* Sections Styling */
-section {
-  margin-bottom: 20px;
-  padding: 15px;
-  border-radius: 8px;
-  background-color: #e9ecef;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+.sidebar, .chat-area {
+  padding: 1rem;
 }
 
-/* Individual Section Styling */
-.home-section, .chat-section, .group-management-section, .user-management-section, .video-chat-section {
-  margin-bottom: 30px;
+.group-management-section, .chat-section, .user-management-section, .video-chat-section {
+  margin-bottom: 1rem;
 }
 
-section h2 {
-  margin-top: 0;
-  color: #007bff;
+.group-item, .channel-item {
+  padding: 0.75rem;
+  background-color: #ffffff;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
 }
 
-/* Footer Section */
+.group-header, .channel-header {
+  font-weight: bold;
+}
+
 .app-footer {
-  background-color: #007bff;
+  background-color: #f7a072; /* Matching warm orange color */
   color: #fff;
   text-align: center;
-  padding: 15px 0;
-  position: relative;
-  bottom: 0;
-  width: 100%;
+  padding: 1rem;
 }

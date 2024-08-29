@@ -19,19 +19,23 @@
   <main class="main-content">
     <!-- Login Section -->
     <section *ngIf="!isAuthenticated" class="login-section">
-      <h2>Login</h2>
-      <form (submit)="login()">
-        <div>
-          <label for="username">Username:</label>
-          <input type="text" id="username" [(ngModel)]="username" name="username" required>
+      <div class="login-container">
+        <div class="login-form">
+          <h2>Login</h2>
+          <form (submit)="login()">
+            <div>
+              <label for="username">Username:</label>
+              <input type="text" id="username" [(ngModel)]="username" name="username" required>
+            </div>
+            <div>
+              <label for="password">Password:</label>
+              <input type="password" id="password" [(ngModel)]="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+            <p *ngIf="loginError" class="error">{{ loginError }}</p>
+          </form>
         </div>
-        <div>
-          <label for="password">Password:</label>
-          <input type="password" id="password" [(ngModel)]="password" name="password" required>
-        </div>
-        <button type="submit">Login</button>
-      </form>
-      <p *ngIf="loginError" class="error">{{ loginError }}</p>
+      </div>
     </section>
 
     <!-- Home Section -->
@@ -47,7 +51,18 @@
             {{ group.name }}
             <button (click)="joinGroupRequest(group.name)" *ngIf="!chatUser?.groups?.includes(group.name)">Request to Join</button>
             <button (click)="leaveGroup(group.name)" *ngIf="chatUser?.groups?.includes(group.name)">Leave Group</button>
-          <li *ngFor="let group of chatUser?.groups">{{ group }}</li>
+            <ul *ngFor="let channel of group.channels">
+              <li>
+                {{ channel.name }}
+                <button (click)="joinChannel(group.name, channel.name)" *ngIf="!channel.members.includes(chatUser?.username || '')">Join Channel</button>
+                <button (click)="leaveChannel(group.name, channel.name)" *ngIf="channel.members.includes(chatUser?.username || '')">Leave Channel</button>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <h3>Your Groups</h3>
+        <ul *ngIf="chatUser && chatUser.groups && chatUser.groups.length > 0">
+          <li *ngFor="let group of chatUser.groups">{{ group }}</li>
         </ul>
       </div>
 
@@ -65,16 +80,26 @@
     </section>
 
     <!-- Chat Section -->
-<section *ngIf="isAuthenticated && currentSection === 'chat'" class="chat-section">
-  <h2>Chat Window</h2>
-  <div *ngIf="userRole === 'chatUser'">
-    <h3>Your Groups</h3>
-    <ul>
-      <li *ngFor="let group of chatUser?.groups">{{ group }}</li>
-    </ul>
-    <button (click)="deleteAccount()">Delete Account</button>
-  </div>
-</section>
+    <section *ngIf="isAuthenticated && currentSection === 'chat'" class="chat-section">
+      <h2>Chat Window</h2>
+      <div *ngIf="userRole === 'chatUser'">
+        <h3>Your Groups</h3>
+        <ul *ngIf="chatUser && chatUser.groups && chatUser.groups.length > 0">
+          <li *ngFor="let group of chatUser.groups">
+            {{ group }}
+          </li>
+        </ul>
+        <h3>Your Channels</h3>
+        <ul *ngIf="chatUser && chatUser.groups && chatUser.groups.length > 0">
+          <li *ngFor="let group of chatUser.groups">
+            <div *ngFor="let channel of getChannels(group)">
+              {{ channel.name }}
+            </div>
+          </li>
+        </ul>
+        <button (click)="deleteAccount()">Delete Account</button>
+      </div>
+    </section>
 
     <!-- Group Management Section -->
     <section *ngIf="isAuthenticated && currentSection === 'group-management'" class="group-management-section">
@@ -92,12 +117,38 @@
               {{ group.name }}
               <button (click)="createChannel(group.name)">Create Channel</button>
               <button (click)="removeGroup(group.name)">Remove Group</button>
-              <ul *ngIf="group.channels.length > 0">
-                <li *ngFor="let channel of group.channels">
-                  {{ channel }}
-                  <button (click)="removeChannel(group.name, channel)">Remove Channel</button>
-                </li>
-              </ul>
+              <!-- Members of Group -->
+              <div>
+                <strong>Members of Group:</strong>
+                <ul>
+                  <li *ngFor="let member of group.members">
+                    {{ member }}
+                    <button (click)="removeMember(group.name, member)">Remove</button>
+                  </li>
+                </ul>
+              </div>
+              <!-- Channels and Members -->
+              <div *ngFor="let channel of group.channels">
+                <strong>Members of Channel: {{ channel.name }}:</strong>
+                <ul>
+                  <li *ngFor="let member of channel.members">
+                    {{ member }}
+                    <button (click)="removeMember(group.name, member)">Remove</button>
+                  </li>
+                </ul>
+                <button (click)="removeChannel(group.name, channel.name)">Remove Channel</button>
+              </div>
+              <!-- Manage Requests -->
+              <div>
+                <strong>Requests:</strong>
+                <ul>
+                  <li *ngFor="let request of group.requests">
+                    {{ request }}
+                    <button (click)="approveRequest(group.name, request)">Approve</button>
+                    <button (click)="denyRequest(group.name, request)">Deny</button>
+                  </li>
+                </ul>
+              </div>
             </li>
           </ul>
         </div>
@@ -110,7 +161,11 @@
           <li *ngFor="let group of groups">
             {{ group.name }}
             <ul *ngIf="group.channels.length > 0">
-              <li *ngFor="let channel of group.channels">{{ channel }}</li>
+              <li *ngFor="let channel of group.channels">
+                {{ channel.name }}
+                <button (click)="joinChannel(group.name, channel.name)" *ngIf="!channel.members.includes(chatUser?.username || '')">Join Channel</button>
+                <button (click)="leaveChannel(group.name, channel.name)" *ngIf="channel.members.includes(chatUser?.username || '')">Leave Channel</button>
+              </li>
             </ul>
           </li>
         </ul>
