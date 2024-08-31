@@ -153,7 +153,9 @@ export class AppComponent {
     }
   }
   
-
+  channelMessages: { [channelName: string]: { username: string, text: string }[] } = {};
+  newMessage: { [channelName: string]: string } = {};
+  
   leaveGroup(groupName: string) {
     const chatUsername = this.chatUser?.username;
 
@@ -310,15 +312,71 @@ export class AppComponent {
     }
   }
 
+  users: { username: string, role: 'chatUser' | 'groupAdmin' | 'superAdmin' }[] = [];
+
   createUser() {
-    // Implement the logic for creating a user
+    const newUsername = prompt('Enter a new username:');
+    if (newUsername) {
+      this.users.push({ username: newUsername, role: 'chatUser' });
+      console.log('User created:', newUsername);
+    }
   }
 
   deleteUser() {
-    // Implement the logic for deleting a user
+    const usernameToDelete = prompt('Enter the username to delete:');
+    if (usernameToDelete) {
+      this.users = this.users.filter(user => user.username !== usernameToDelete);
+      console.log('User deleted:', usernameToDelete);
+    }
   }
 
   promoteUser() {
-    // Implement the logic for promoting a user
+    const usernameToPromote = prompt('Enter the username to promote:');
+    if (usernameToPromote) {
+      const userToPromote = this.users.find(user => user.username === usernameToPromote);
+      if (userToPromote) {
+        userToPromote.role = 'groupAdmin';
+        console.log('User promoted:', usernameToPromote);
+      }
+    }
   }
+
+  sendMessage(groupName: string, channelName: string) {
+    const channel = this.getChannel(groupName, channelName);
+    if (channel && this.chatUser) {
+      const message = this.newMessage[channelName];
+      if (message.trim()) {
+        // Add message to channel's messages
+        if (!this.channelMessages[channelName]) {
+          this.channelMessages[channelName] = [];
+        }
+        this.channelMessages[channelName].push({
+          username: this.chatUser.username,
+          text: message
+        });
+        // Clear the input field
+        this.newMessage[channelName] = '';
+        
+        // Store messages to localStorage (for persistence across sessions)
+        this.saveMessagesToLocalStorage();
+      }
+    }
+  }
+  
+  getChannel(groupName: string, channelName: string) {
+    const group = this.groups.find(g => g.name === groupName);
+    return group ? group.channels.find(c => c.name === channelName) : null;
+  }
+  
+  saveMessagesToLocalStorage() {
+    localStorage.setItem('channelMessages', JSON.stringify(this.channelMessages));
+  }
+  
+  loadMessagesFromLocalStorage() {
+    const savedMessages = localStorage.getItem('channelMessages');
+    if (savedMessages) {
+      this.channelMessages = JSON.parse(savedMessages);
+    }
+  }
+  
 }

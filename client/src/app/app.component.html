@@ -80,26 +80,29 @@
     </section>
 
     <!-- Chat Section -->
-    <section *ngIf="isAuthenticated && currentSection === 'chat'" class="chat-section">
-      <h2>Chat Window</h2>
-      <div *ngIf="userRole === 'chatUser'">
-        <h3>Your Groups</h3>
-        <ul *ngIf="chatUser && chatUser.groups && chatUser.groups.length > 0">
-          <li *ngFor="let group of chatUser.groups">
-            {{ group }}
-          </li>
-        </ul>
-        <h3>Your Channels</h3>
-        <ul *ngIf="chatUser && chatUser.groups && chatUser.groups.length > 0">
-          <li *ngFor="let group of chatUser.groups">
-            <div *ngFor="let channel of getChannels(group)">
-              {{ channel.name }}
+<section *ngIf="isAuthenticated && currentSection === 'chat'" class="chat-section">
+  <h2>Chat Window</h2>
+  <div *ngIf="userRole === 'chatUser'">
+    <h3>Your Channels</h3>
+    <ul *ngIf="chatUser && chatUser.groups && chatUser.groups.length > 0">
+      <li *ngFor="let group of chatUser.groups">
+        <div *ngFor="let channel of getChannels(group)">
+          <div class="channel-chat">
+            <h4>{{ channel.name }}</h4>
+            <div class="messages" *ngIf="channelMessages[channel.name]">
+              <div *ngFor="let message of channelMessages[channel.name]">
+                <p>{{ message.username }}: {{ message.text }}</p>
+              </div>
             </div>
-          </li>
-        </ul>
-        <button (click)="deleteAccount()">Delete Account</button>
-      </div>
-    </section>
+            <input type="text" [(ngModel)]="newMessage[channel.name]" placeholder="Type your message..." />
+            <button (click)="sendMessage(group, channel.name)">Send</button>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <button (click)="deleteAccount()">Delete Account</button>
+  </div>
+</section>
 
     <!-- Group Management Section -->
     <section *ngIf="isAuthenticated && currentSection === 'group-management'" class="group-management-section">
@@ -174,14 +177,17 @@
     </section>
 
     <!-- User Management Section -->
-    <section *ngIf="isAuthenticated && currentSection === 'user-management'" class="user-management-section">
-      <h2>User Management</h2>
-      <div *ngIf="userRole === 'superAdmin'">
-        <button (click)="createUser()">Create User</button>
-        <button (click)="deleteUser()">Delete User</button>
-        <button (click)="promoteUser()">Promote User</button>
-      </div>
-    </section>
+<section *ngIf="isAuthenticated && currentSection === 'user-management'" class="user-management-section">
+  <h2>User Management</h2>
+  <div *ngIf="userRole === 'superAdmin'">
+    <button (click)="createUser()">Create User</button>
+    <button (click)="deleteUser()">Delete User</button>
+    <button (click)="promoteUser()">Promote User</button>
+    <ul>
+      <li *ngFor="let user of users">{{ user.username }} ({{ user.role }})</li>
+    </ul>
+  </div>
+</section>
 
     <!-- Video Chat Section -->
     <section *ngIf="isAuthenticated && currentSection === 'video-chat'" class="video-chat-section">
@@ -189,6 +195,22 @@
       <app-video-chat></app-video-chat>
     </section>
   </main>
+
+  <!-- Admin Chat Messages View -->
+<div *ngIf="userRole === 'superAdmin'">
+  <h3>Chat Messages</h3>
+  <div *ngFor="let group of groups">
+    <h4>{{ group.name }}</h4>
+    <div *ngFor="let channel of group.channels">
+      <h5>{{ channel.name }}</h5>
+      <div *ngIf="channelMessages[channel.name]">
+        <div *ngFor="let message of channelMessages[channel.name]">
+          <p>{{ message.username }}: {{ message.text }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
   <!-- Footer Section -->
   <footer class="app-footer" *ngIf="isAuthenticated">
