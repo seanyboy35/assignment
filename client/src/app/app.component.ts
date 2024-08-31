@@ -22,7 +22,7 @@ import { ChatComponent } from './chat/chat.component';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
-  title = 'My Application';
+  title = 'Chat Application';
   companyName: string = 'Your Company Name';
   currentSection: string = 'home';
   isAuthenticated: boolean = false;
@@ -44,8 +44,6 @@ export class AppComponent {
   initializeGroups() {
     // Sample groups initialized for demonstration
     this.groups = [
-      { name: 'Group 1', channels: [{ name: 'Channel 1 of Group 1', members: [] }], members: [], requests: [] },
-      { name: 'Group 2', channels: [{ name: 'Channel 1 of Group 2', members: [] }], members: [], requests: [] }
     ];
   }
 
@@ -54,7 +52,13 @@ export class AppComponent {
   }
 
   login() {
-    if (this.username === 'super' && this.password === '123') {
+    const user = this.users.find(u => u.username === this.username && u.password === this.password);
+    if (user) {
+      this.isAuthenticated = true;
+      this.userRole = user.role;
+      this.loginError = null;
+      this.navigateTo('home'); // Redirect to home after successful login
+    } else if (this.username === 'super' && this.password === '123') {
       this.isAuthenticated = true;
       this.userRole = 'superAdmin'; // Set role for Super Admin
       this.loginError = null;
@@ -62,12 +66,6 @@ export class AppComponent {
     } else if (this.username === 'group' && this.password === '123') {
       this.isAuthenticated = true;
       this.userRole = 'groupAdmin'; // Set role for Group Admin
-      this.loginError = null;
-      this.navigateTo('home'); // Redirect to home after successful login
-    } else if (this.username === 'chat' && this.password === '123') {
-      this.isAuthenticated = true;
-      this.userRole = 'chatUser'; // Set role for Chat User
-      this.chatUser = this.getOrCreateChatUser(this.username);
       this.loginError = null;
       this.navigateTo('home'); // Redirect to home after successful login
     } else {
@@ -111,11 +109,10 @@ export class AppComponent {
   }
 
   // Group Management functions
-  createGroup() {
-    const newGroupName = `Group ${this.groups.length + 1}`;
-    this.groups.push({ name: newGroupName, channels: [], members: [], requests: [] });
-    console.log('Creating group...', newGroupName);
-  }
+  createGroup(groupName: string = `Group ${this.groups.length + 1}`) {
+  this.groups.push({ name: groupName, channels: [], members: [], requests: [] });
+  console.log(`Group created: ${groupName}`);
+}
 
   createChannel(groupName: string) {
     const group = this.groups.find(g => g.name === groupName);
@@ -312,12 +309,13 @@ export class AppComponent {
     }
   }
 
-  users: { username: string, role: 'chatUser' | 'groupAdmin' | 'superAdmin' }[] = [];
+  users: { username: string, password: string, role: 'chatUser' | 'groupAdmin' | 'superAdmin' }[] = [];
 
   createUser() {
     const newUsername = prompt('Enter a new username:');
-    if (newUsername) {
-      this.users.push({ username: newUsername, role: 'chatUser' });
+    const newPassword = prompt('Enter a password for the new user:');
+    if (newUsername && newPassword) {
+      this.users.push({ username: newUsername, password: newPassword, role: 'chatUser' });
       console.log('User created:', newUsername);
     }
   }
@@ -340,6 +338,42 @@ export class AppComponent {
       }
     }
   }
+
+  demoteUser() {
+    const usernameToDemote = prompt('Enter the username to demote:');
+    if (usernameToDemote) {
+      const userToDemote = this.users.find(user => user.username === usernameToDemote);
+      if (userToDemote) {
+        userToDemote.role = 'chatUser';
+        console.log('User Demoted:', usernameToDemote);
+      }
+    }
+  }
+
+  register() {
+    const newUsername = prompt('Enter a new username:');
+    const newPassword = prompt('Enter a password for the new user:');
+    if (newUsername && newPassword) {
+      const newUser = {
+        username: newUsername,
+        publicUsername: newUsername, // Add publicUsername property
+        groups: [], // Add groups property
+        password: newPassword,
+        role: 'chatUser' as 'chatUser'
+      };
+      this.users.push(newUser);
+      console.log('User registered:', newUsername);
+  
+      // Log in to the newly created account
+      this.username = newUsername;
+      this.password = newPassword;
+      this.login();
+  
+      // Update this.chatUser with the new user's information
+      this.chatUser = newUser;
+    }
+  }
+  
 
   sendMessage(groupName: string, channelName: string) {
     const channel = this.getChannel(groupName, channelName);

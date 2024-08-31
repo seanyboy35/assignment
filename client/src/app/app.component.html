@@ -18,25 +18,26 @@
   <!-- Main Content Section -->
   <main class="main-content">
     <!-- Login Section -->
-    <section *ngIf="!isAuthenticated" class="login-section">
-      <div class="login-container">
-        <div class="login-form">
-          <h2>Login</h2>
-          <form (submit)="login()">
-            <div>
-              <label for="username">Username:</label>
-              <input type="text" id="username" [(ngModel)]="username" name="username" required>
-            </div>
-            <div>
-              <label for="password">Password:</label>
-              <input type="password" id="password" [(ngModel)]="password" name="password" required>
-            </div>
-            <button type="submit">Login</button>
-            <p *ngIf="loginError" class="error">{{ loginError }}</p>
-          </form>
+<section *ngIf="!isAuthenticated" class="login-section">
+  <div class="login-container">
+    <div class="login-form">
+      <h2>Login</h2>
+      <form (submit)="login()">
+        <div>
+          <label for="username">Username:</label>
+          <input type="text" id="username" [(ngModel)]="username" name="username" required>
         </div>
-      </div>
-    </section>
+        <div>
+          <label for="password">Password:</label>
+          <input type="password" id="password" [(ngModel)]="password" name="password" required>
+        </div>
+        <button type="submit">Login</button>
+        <p *ngIf="loginError" class="error">{{ loginError }}</p>
+        <p>Don't have an account? <button (click)="register()">Register</button></p>
+      </form>
+    </div>
+  </div>
+</section>
 
     <!-- Home Section -->
     <section *ngIf="isAuthenticated && currentSection === 'home'" class="home-section">
@@ -78,7 +79,7 @@
         </ul>
       </div>
     </section>
-
+    
     <!-- Chat Section -->
 <section *ngIf="isAuthenticated && currentSection === 'chat'" class="chat-section">
   <h2>Chat Window</h2>
@@ -183,6 +184,7 @@
     <button (click)="createUser()">Create User</button>
     <button (click)="deleteUser()">Delete User</button>
     <button (click)="promoteUser()">Promote User</button>
+    <button (click)="demoteUser()">Demote User</button>
     <ul>
       <li *ngFor="let user of users">{{ user.username }} ({{ user.role }})</li>
     </ul>
@@ -196,24 +198,8 @@
     </section>
   </main>
 
-  <!-- Admin Chat Messages View -->
-<div *ngIf="userRole === 'superAdmin'">
-  <h3>Chat Messages</h3>
-  <div *ngFor="let group of groups">
-    <h4>{{ group.name }}</h4>
-    <div *ngFor="let channel of group.channels">
-      <h5>{{ channel.name }}</h5>
-      <div *ngIf="channelMessages[channel.name]">
-        <div *ngFor="let message of channelMessages[channel.name]">
-          <p>{{ message.username }}: {{ message.text }}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
   <!-- Footer Section -->
   <footer class="app-footer" *ngIf="isAuthenticated">
-    <p>&copy; 2024 {{ companyName }}. All rights reserved.</p>
   </footer>
 </div>
