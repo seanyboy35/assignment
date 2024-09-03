@@ -328,24 +328,34 @@ export class AppComponent {
     }
   }
 
+
   promoteUser() {
     const usernameToPromote = prompt('Enter the username to promote:');
     if (usernameToPromote) {
       const userToPromote = this.users.find(user => user.username === usernameToPromote);
       if (userToPromote) {
-        userToPromote.role = 'groupAdmin';
-        console.log('User promoted:', usernameToPromote);
+        if (userToPromote.role === 'chatUser') {
+          userToPromote.role = 'groupAdmin';
+          console.log('User promoted from ChatUser to GroupAdmin:', usernameToPromote);
+        } else if (userToPromote.role === 'groupAdmin') {
+          userToPromote.role = 'superAdmin';
+          console.log('User promoted from GroupAdmin to SuperAdmin:', usernameToPromote);
+        }
       }
     }
   }
-
   demoteUser() {
     const usernameToDemote = prompt('Enter the username to demote:');
     if (usernameToDemote) {
       const userToDemote = this.users.find(user => user.username === usernameToDemote);
       if (userToDemote) {
-        userToDemote.role = 'chatUser';
-        console.log('User Demoted:', usernameToDemote);
+        if (userToDemote.role === 'superAdmin') {
+          userToDemote.role = 'groupAdmin';
+          console.log('User Demoted', usernameToDemote);
+        } else if (userToDemote.role === 'groupAdmin') {
+          userToDemote.role = 'chatUser';
+          console.log('User Demoted:', usernameToDemote);
+        }
       }
     }
   }
