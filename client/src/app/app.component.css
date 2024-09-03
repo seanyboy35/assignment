@@ -85,7 +85,7 @@ button:hover {
 }
 
 .app-header {
-  background-color: #f7a072; /* Warm orange color */
+  background-color: #72c9f7; /* Light Blue color */
   color: #fff;
   padding: 1rem;
   text-align: center;
@@ -138,7 +138,7 @@ button:hover {
 }
 
 .app-footer {
-  background-color: #f7a072; /* Matching warm orange color */
+  background-color: #72c9f7; /* Matching warm orange color */
   color: #fff;
   text-align: center;
   padding: 1rem;
