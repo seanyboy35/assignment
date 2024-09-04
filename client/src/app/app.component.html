@@ -133,13 +133,14 @@
                   </li>
                 </ul>
               </div>
-              <!-- Channels and Members -->
-              <div *ngFor="let channel of group.channels">
+               <!-- Channels and Members -->
+               <div *ngFor="let channel of group.channels">
                 <strong>Members of Channel: {{ channel.name }}:</strong>
                 <ul>
                   <li *ngFor="let member of channel.members">
                     {{ member }}
                     <button (click)="removeMember(group.name, member)">Remove</button>
+                    <button (click)="banMember(group.name, channel.name, member)">Ban and Report</button>
                   </li>
                 </ul>
                 <button (click)="removeChannel(group.name, channel.name)">Remove Channel</button>
