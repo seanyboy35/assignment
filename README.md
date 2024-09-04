@@ -109,7 +109,7 @@ The chat system has three levels of permissions:
 - MongoDB (for phase 2)
 
 ### Installation
-1. Clone the repository: `git clone https://github.com/yourusername/chatsystem.git`
+1. Clone the repository: `git clone https://https://github.com/seanyboy35/assignment.git`
 2. Navigate to the project directory:
    - `cd server`: Set up the backend.
    - `cd client`: Set up the frontend.
