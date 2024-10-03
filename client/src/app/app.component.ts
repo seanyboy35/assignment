@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms'; // Import FormsModule to use ngMod
 import { VideoChatComponent } from './video-chat/video-chat.component';
 import { UserManagementComponent } from './user-management/user-management.component';
 import { GroupManagementComponent } from './group-management/group-management.component';
-import { ChatComponent } from './chat/chat.component';
+import { SocketService } from './sockets.service';
 
 
 @Component({
@@ -16,11 +16,12 @@ import { ChatComponent } from './chat/chat.component';
     VideoChatComponent,
     UserManagementComponent,
     GroupManagementComponent,
-    ChatComponent,
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
+
+
 export class AppComponent {
   title = 'Chat Application';
   companyName: string = 'Your Company Name';
@@ -30,16 +31,18 @@ export class AppComponent {
   password: string = '';
   loginError: string | null = null;
   userRole: 'chatUser' | 'groupAdmin' | 'superAdmin' | '' = ''; // Manage user roles with string literals
+  message: string = '';
+  messages: { username: string; message: string }[] = [];
+  channelMessages: { [channelName: string]: { username: string, text: string }[] } = {};
+  newMessage: { [channelName: string]: string } = {};
+  
+  constructor(private socketService: SocketService) {
+    this.username = this.getUsername(); // Automatically get the username
+  }
 
   // Updated to store groups and their associated channels
   groups: { name: string, channels: { name: string, members: string[] }[], members: string[], requests: string[] }[] = [];
   chatUser: { username: string, publicUsername: string, groups: string[] } | null = null; // Stores the chat user's info
-
-  
-  constructor() {
-    this.initializeGroups(); // Initialize groups and other data
-    this.loadChatUser(); // Load chat user from local storage if available
-  }
 
   initializeGroups() {
     // Sample groups initialized for demonstration
@@ -82,6 +85,7 @@ export class AppComponent {
     }
     return { username, publicUsername, groups: [] };
   }
+
   getGroup(groupName: string) {
     return this.groups.find(g => g.name === groupName);
   }
@@ -149,10 +153,7 @@ export class AppComponent {
       }
     }
   }
-  
-  channelMessages: { [channelName: string]: { username: string, text: string }[] } = {};
-  newMessage: { [channelName: string]: string } = {};
-  
+    
   leaveGroup(groupName: string) {
     const chatUsername = this.chatUser?.username;
 
@@ -311,14 +312,20 @@ export class AppComponent {
 
   users: { username: string, password: string, role: 'chatUser' | 'groupAdmin' | 'superAdmin' }[] = [];
 
-  createUser() {
-    const newUsername = prompt('Enter a new username:');
-    const newPassword = prompt('Enter a password for the new user:');
-    if (newUsername && newPassword) {
-      this.users.push({ username: newUsername, password: newPassword, role: 'chatUser' });
-      console.log('User created:', newUsername);
-    }
+createUser() {
+  const newUsername = prompt('Enter a new username:');
+  const newPassword = prompt('Enter a password for the new user:');
+  
+  // Check if the username already exists
+  const existingUser = this.users.find(user => user.username === newUsername);
+  
+  if (!existingUser && newUsername && newPassword) {
+    this.users.push({ username: newUsername, password: newPassword, role: 'chatUser' });
+    console.log('User created:', newUsername);
+  } else {
+    console.log('Username already exists. Please choose a different username.');
   }
+}
 
   deleteUser() {
     const usernameToDelete = prompt('Enter the username to delete:');
@@ -327,7 +334,6 @@ export class AppComponent {
       console.log('User deleted:', usernameToDelete);
     }
   }
-
 
   promoteUser() {
     const usernameToPromote = prompt('Enter the username to promote:');
@@ -363,10 +369,15 @@ export class AppComponent {
   register() {
     const newUsername = prompt('Enter a new username:');
     const newPassword = prompt('Enter a password for the new user:');
-    if (newUsername && newPassword) {
+    const newEmail = prompt('Enter an email for the new user:'); // Add email input
+    const newId = Math.floor(Math.random() * 100000); // Generate a random id
+  
+    if (newUsername && newPassword && newEmail) {
       const newUser = {
+        id: newId, // Add id property
         username: newUsername,
         publicUsername: newUsername, // Add publicUsername property
+        email: newEmail, // Add email property
         groups: [], // Add groups property
         password: newPassword,
         role: 'chatUser' as 'chatUser'
@@ -383,30 +394,7 @@ export class AppComponent {
       this.chatUser = newUser;
     }
   }
-  
-
-  sendMessage(groupName: string, channelName: string) {
-    const channel = this.getChannel(groupName, channelName);
-    if (channel && this.chatUser) {
-      const message = this.newMessage[channelName];
-      if (message.trim()) {
-        // Add message to channel's messages
-        if (!this.channelMessages[channelName]) {
-          this.channelMessages[channelName] = [];
-        }
-        this.channelMessages[channelName].push({
-          username: this.chatUser.username,
-          text: message
-        });
-        // Clear the input field
-        this.newMessage[channelName] = '';
-        
-        // Store messages to localStorage (for persistence across sessions)
-        this.saveMessagesToLocalStorage();
-      }
-    }
-  }
-  
+   
   getChannel(groupName: string, channelName: string) {
     const group = this.groups.find(g => g.name === groupName);
     return group ? group.channels.find(c => c.name === channelName) : null;
@@ -422,7 +410,41 @@ export class AppComponent {
       this.channelMessages = JSON.parse(savedMessages);
     }
   }
+
   banMember(groupName: string, channelName: string, member: string): void {
     console.log(`Reporting to super admins: Banned member ${member} from channel ${channelName} in group ${groupName}`)
+  }
+
+  ngOnInit(): void {
+    // Listen for incoming messages from the server
+    this.socketService.getMessages().subscribe(
+      (msg: { username: string; message: string }) => {
+        console.log('Received message:', msg);
+        this.messages.push(msg);
+      },
+      (error) => {
+        console.error('Socket error: ', error);
+      }
+    );
+  }
+
+  sendMessage(event: Event): void {
+    event.preventDefault();
+    if (this.message.trim()) {
+      // Create message object with the username
+      const messageObject = {
+        username: this.username,
+        message: this.message,
+      };
+      // Send the message to the server
+      this.socketService.sendMessage(messageObject);
+      this.message = '';  // Clear the input after sending
+    }
+  }
+
+  getUsername(): string {
+    // Implement your logic to get the username here
+    // For example, you might get it from local storage or a service
+    return 'username'; // Replace with actual logic to get the username
   }
 }

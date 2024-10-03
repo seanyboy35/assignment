@@ -3,10 +3,17 @@ const http = require('http');
 const socketIo = require('socket.io');
 const mongoose = require('mongoose');
 const routes = require('./routes');
+const cors = require('cors');  // Import cors for use in express
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
+
+// Enable CORS for your entire Express app (optional)
+app.use(cors({
+  origin: "http://localhost:4200/",  // Allow your Angular app
+  methods: ["GET", "POST"]
+}));
 
 mongoose.connect('mongodb://localhost/chat-system', {
   useNewUrlParser: true,
@@ -21,24 +28,21 @@ app.get('/', (req, res) => {
   res.send('Welcome to the Chat Application!');
 });
 
-// Socket.io setup
+// Socket.IO connection handler
 io.on('connection', (socket) => {
-  console.log('New client connected');
+  console.log('A user connected:', socket.id);
 
-  socket.on('join', (channel) => {
-    socket.join(channel);
-    console.log(`Client joined channel: ${channel}`);
+  // Handle incoming messages
+  socket.on('chat message', (msg) => {
+    console.log('Message received:', msg);
+    io.emit('chat message', msg);  // Broadcast message to all clients
   });
 
-  socket.on('message', (data) => {
-    io.to(data.channel).emit('message', data.message);
-    console.log(`Message sent to channel ${data.channel}: ${data.message}`);
-  });
-
+  // Handle disconnections
   socket.on('disconnect', () => {
-    console.log('Client disconnected');
+    console.log('A user disconnected:', socket.id);
   });
 });
 
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log('Server running on port ${PORT}'));
