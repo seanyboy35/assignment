@@ -147,3 +147,68 @@ button:hover {
   text-align: center;
   padding: 1rem;
 }
+
+  /* Scoped to chat-container */
+  .chat-section .chat-container {
+    max-width: 600px;         
+    margin: 20px auto;       
+    padding: 20px;           
+    border: 1px solid #ddd;  
+    border-radius: 8px;      
+    background-color: #f9f9f9; 
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .chat-section form {
+    display: flex;           
+    margin-bottom: 20px;    
+  }
+  
+  .chat-section input[type="text"] {
+    flex: 1;                
+    padding: 10px;         
+    border: 1px solid #ccc;
+    border-radius: 4px;    
+    font-size: 16px;       
+    transition: border-color 0.3s;
+  }
+  
+  .chat-section input[type="text"]:focus {
+    border-color: #66afe9; 
+    outline: none;         
+  }
+  
+  .chat-section button {
+    padding: 10px 15px;   
+    background-color: #007bff; 
+    color: white;         
+    border: none;         
+    border-radius: 4px;   
+    cursor: pointer;       
+    font-size: 16px;      
+    margin-left: 10px;    
+    transition: background-color 0.3s;
+  }
+  
+  .chat-section button:hover {
+    background-color: #0056b3;
+  }
+  
+  .chat-section .chat-messages {
+    list-style: none;     
+    padding: 0;          
+    margin: 0;           
+  }
+  
+  .chat-section .chat-messages li {
+    padding: 10px;       
+    margin-bottom: 10px;
+    border-radius: 4px;  
+    background-color: #e9ecef;
+    transition: background-color 0.3s;
+  }
+  
+  .chat-section .chat-messages li:hover {
+    background-color: #d5d9db;
+  }
+  

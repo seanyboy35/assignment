@@ -53,7 +53,7 @@
     <section *ngIf="isAuthenticated && currentSection === 'home'" class="home-section">
       <h1>Home Page</h1>
       <!-- Home page content -->
-      <p>Navigate using the menu above to explore the application's features.</p>
+      <p>Use the navigation above to access different features of the application.</p>
       
       <!-- Chat User Specific Content -->
       <div *ngIf="userRole === 'chatUser'">
@@ -85,7 +85,6 @@
 
 <hr>
 <br>
-<br>
 
       <!-- Admin view to manage group requests -->
       <div *ngIf="userRole === 'superAdmin' || userRole === 'groupAdmin'">
@@ -101,6 +100,10 @@
           </li>
         </ul>
       </div>
+      <br><br><br><br><br><br><br>
+      <hr>
+      <!-- Button to delete the account -->
+<button (click)="deleteAccount()">Delete Account</button>
     </section>
     
     <!-- Chat Section -->
@@ -127,8 +130,6 @@
         </li>
       </ul>
     </div>
-          <!-- Button to delete the account -->
-    <button (click)="deleteAccount()">Delete Account</button>
   </div>
 </section>
 
