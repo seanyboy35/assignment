@@ -7,7 +7,7 @@ import { GroupManagementComponent } from './group-management/group-management.co
 import { SocketService } from './sockets.service';
 import { Injectable } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withFetch } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -19,7 +19,7 @@ import { Observable } from 'rxjs';
     VideoChatComponent,
     UserManagementComponent,
     GroupManagementComponent,
-    HttpClientModule
+    HttpClientModule,
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],

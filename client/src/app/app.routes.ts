@@ -4,6 +4,7 @@ import { VideoChatComponent } from './video-chat/video-chat.component';
 import { UserManagementComponent } from './user-management/user-management.component';
 import { ChatInterfaceComponent } from './chat/chat-interface.component';
 import { GroupManagementComponent } from './group-management/group-management.component';
+import { HttpClientModule, provideHttpClient, withFetch } from '@angular/common/http';
 
 export const routes: Routes = [
   { path: '', component: VideoChatComponent },
@@ -14,6 +15,7 @@ export const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
+  providers: [provideHttpClient(withFetch())],
 })
 export class AppRoutingModule { }

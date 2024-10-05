@@ -26,10 +26,6 @@ db.on('error', (err) => {
   console.error(err);
 });
 
-db.once('open', () => {
-  console.log('Connected to MongoDB');
-});
-
 // Middleware
 app.use(bodyParser.json());  // Parse incoming JSON requests
 app.use(express.json());
