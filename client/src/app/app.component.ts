@@ -39,7 +39,7 @@ export class AppComponent {
   loginError: string | null = null;
   userRole: 'chatUser' | 'groupAdmin' | 'superAdmin' | '' = ''; // Manage user roles with string literals
   message: string = '';
-  messages: { username: string; message: string }[] = [];
+  messages: { username: string; message: string; }[] = [];
   channelMessages: { [channelName: string]: { username: string, text: string }[] } = {};
   newMessage: { [channelName: string]: string } = {};
   private apiUrl = 'http://localhost:3000/api/messages';
@@ -48,7 +48,7 @@ export class AppComponent {
     this.username = this.getUsername(); // Automatically get the username
   }
 
-  // Updated to store groups and their associated channels
+   // Updated to store groups and their associated channels
   groups: { name: string, channels: { name: string, members: string[] }[], members: string[], requests: string[] }[] = [];
   chatUser: { username: string, publicUsername: string, groups: string[] } | null = null; // Stores the chat user's info
 
@@ -426,7 +426,7 @@ createUser() {
   ngOnInit(): void {
     // Listen for incoming messages from the server
     this.socketService.getMessages().subscribe(
-      (msg: { username: string; message: string }) => {
+      (msg: { username: string; message: string; }) => {
         console.log('Received message:', msg);
         this.messages.push(msg);
       },
