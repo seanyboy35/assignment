@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { Message } = require('../models'); // Ensure your models are correctly imported
 
+
+
 // POST /api/messages
 router.post('/', async (req, res) => {
   const { username, text } = req.body;

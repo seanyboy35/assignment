@@ -377,31 +377,34 @@ createUser() {
   register() {
     const newUsername = prompt('Enter a new username:');
     const newPassword = prompt('Enter a password for the new user:');
-    const newEmail = prompt('Enter an email for the new user:'); // Add email input
-    const newId = Math.floor(Math.random() * 100000); // Generate a random id
-  
+    const newEmail = prompt('Enter an email for the new user:');
+
     if (newUsername && newPassword && newEmail) {
-      const newUser = {
-        id: newId, // Add id property
-        username: newUsername,
-        publicUsername: newUsername, // Add publicUsername property
-        email: newEmail, // Add email property
-        groups: [], // Add groups property
-        password: newPassword,
-        role: 'chatUser' as 'chatUser'
-      };
-      this.users.push(newUser);
-      console.log('User registered:', newUsername);
-  
-      // Log in to the newly created account
-      this.username = newUsername;
-      this.password = newPassword;
-      this.login();
-  
-      // Update this.chatUser with the new user's information
-      this.chatUser = newUser;
+        const newUser = {
+            id: Date.now(), // Generate a unique ID based on the current timestamp
+            username: newUsername,
+            publicUsername: newUsername,
+            email: newEmail,
+            groups: [],
+            password: newPassword,
+            role: 'chatUser' as 'chatUser'
+        };
+
+        this.http.post('http://localhost:3000/api/register', newUser).subscribe(
+            (response) => {
+                console.log('User registered:', newUsername);
+                this.username = newUsername;
+                this.password = newPassword;
+                this.login();
+                this.chatUser = newUser;
+            },
+            (error) => {
+                console.error('Error registering user:', error);
+            }
+        );
     }
-  }
+}
+
    
   getChannel(groupName: string, channelName: string) {
     const group = this.groups.find(g => g.name === groupName);
