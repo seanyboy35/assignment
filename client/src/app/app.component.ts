@@ -5,7 +5,10 @@ import { VideoChatComponent } from './video-chat/video-chat.component';
 import { UserManagementComponent } from './user-management/user-management.component';
 import { GroupManagementComponent } from './group-management/group-management.component';
 import { SocketService } from './sockets.service';
-
+import { Injectable } from '@angular/core';
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -16,11 +19,15 @@ import { SocketService } from './sockets.service';
     VideoChatComponent,
     UserManagementComponent,
     GroupManagementComponent,
+    HttpClientModule
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
 
+@Injectable({
+  providedIn: 'root'
+})
 
 export class AppComponent {
   title = 'Chat Application';
@@ -35,8 +42,9 @@ export class AppComponent {
   messages: { username: string; message: string }[] = [];
   channelMessages: { [channelName: string]: { username: string, text: string }[] } = {};
   newMessage: { [channelName: string]: string } = {};
+  private apiUrl = 'http://localhost:3000/api/messages';
   
-  constructor(private socketService: SocketService) {
+  constructor(private socketService: SocketService, private http: HttpClient) {
     this.username = this.getUsername(); // Automatically get the username
   }
 
@@ -428,19 +436,16 @@ createUser() {
     );
   }
 
-  sendMessage(event: Event): void {
-    event.preventDefault();
-    if (this.message.trim()) {
-      // Create message object with the username
-      const messageObject = {
-        username: this.username,
-        message: this.message,
-      };
-      // Send the message to the server
-      this.socketService.sendMessage(messageObject);
-      this.message = '';  // Clear the input after sending
-    }
-  }
+// Send a new message to the server
+sendMessage(username: string, text: string): void {
+  const messageObject = { username: username, text: text }; // Use the parameters correctly
+  this.socketService.sendMessage(messageObject); // Send the message object to the socket service
+}
+
+// Retrieve all messages from the server
+getMessages(): Observable<any> {
+  return this.http.get(this.apiUrl);
+}
 
   getUsername(): string {
     // Implement your logic to get the username here

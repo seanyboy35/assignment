@@ -38,7 +38,7 @@ export class ChatInterfaceComponent {
       // Create message object with the username
       const messageObject = {
         username: this.username,
-        message: this.message,
+        text: this.message,
       };
       // Send the message to the server
       this.socketService.sendMessage(messageObject);

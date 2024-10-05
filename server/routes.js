@@ -1,6 +1,6 @@
 // routes.js
 const express = require('express');
-const { User, Group, Channel } = require('./models');
+const { User, Group, Channel } = require('./models.js');
 const router = express.Router();
 
 // User Routes
@@ -39,4 +39,31 @@ router.post('/channels', async (req, res) => {
   res.json(channel);
 });
 
-module.exports = router;
+// routes/messageRoutes.js
+
+const { Message } = require('./models'); // Import the Message model
+
+// Route to Add a New Message
+router.post('/messages', async (req, res) => {
+  try {
+    const { user, text } = req.body;
+    const message = new Message({ user, text });
+    await message.save();  // Save the message to MongoDB
+    res.status(201).json(message);  // Respond with the saved message
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to save message' });
+  }
+});
+
+// Route to Retrieve All Messages
+router.get('/messages', async (req, res) => {
+  try {
+    const messages = await Message.find();  // Get all messages from MongoDB
+    res.json(messages);  // Respond with the list of messages
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve messages' });
+  }
+});
+
+module.exports = router;  // Export the router so it can be used in the main server file
+

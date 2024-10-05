@@ -113,7 +113,7 @@
   <div *ngIf="userRole === 'superAdmin'">
     <h3>Your Channels</h3>
     <div class="chat-container">
-      <form (submit)="sendMessage($event)">
+      <form (submit)="sendMessage(username, message)">
         <input
           type="text"
           [(ngModel)]="message"

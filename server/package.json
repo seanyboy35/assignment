@@ -11,7 +11,7 @@
   "description": "",
   "dependencies": {
     "express": "^4.19.2",
-    "mongoose": "^8.5.2",
+    "mongoose": "^8.7.0",
     "peer": "^1.0.2",
     "socket.io": "^4.8.0"
   }

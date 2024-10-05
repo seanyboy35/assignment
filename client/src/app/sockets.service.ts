@@ -7,7 +7,7 @@ import { isPlatformBrowser } from '@angular/common';
   providedIn: 'root',
 })
 export class SocketService {
-  private socket!: Socket;
+  private socket: Socket | undefined;
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     if (isPlatformBrowser(this.platformId)) {
@@ -23,10 +23,11 @@ export class SocketService {
     }
   }
 
-  // Send a message to the server
-  sendMessage(messageObject: { username: string; message: string }): void {
+  sendMessage(messageObject: { username: string; text: string }): void {
     if (this.socket) {
       this.socket.emit('chat message', messageObject); // Send the entire object
+    } else {
+      console.error('Socket connection not established');
     }
   }
 
@@ -63,4 +64,7 @@ export class SocketService {
       }
     });
   }
+
+
+  
 }
