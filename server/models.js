@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  id: { type: mongoose.Types.ObjectId, unique: true, not: null, }, // Ensure this field is unique
   username: { type: String, required: true },
   email: { type: String, required: true, unique: true }, // Ensure email is unique as well
   password: { type: String, required: true },
   groups: { type: [String], default: [] },
-  role: { type: String, default: 'chatUser' }
+  role: { type: String, required: true }
 });
 
 

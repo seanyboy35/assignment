@@ -4,11 +4,66 @@ const { User } = require('../models'); // Ensure the path is correct
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
+// Predefined users
+const predefinedUsers = [
+  {
+      username: 'superAdmin',
+      password: '123',
+      email: 'superadmin@example.com'
+  },
+  {
+      username: 'groupAdmin',
+      password: '123',
+      email: 'groupadmin@example.com'
+  }
+];
+
+// Function to create predefined users if they don't exist
+const createPredefinedUsers = async () => {
+  const predefinedUsers = [
+      { username: 'superAdmin', password: '123', email: 'superadmin@example.com', role: 'superAdmin' },
+      { username: 'groupAdmin', password: '123', email: 'groupadmin@example.com', role: 'groupAdmin' },
+  ];
+
+  for (const user of predefinedUsers) {
+      const existingUser = await User.findOne({ username: user.username });
+      if (!existingUser) {
+          const salt = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(user.password, salt);
+          const newUser = new User({ ...user, password: hashedPassword });
+          await newUser.save();
+          console.log(`Predefined user created: ${user.username}`);
+      }
+  }
+};
+
+// Call the function to create predefined users on server start
+createPredefinedUsers();
+
 // Registration endpoint
 router.post('/register', async (req, res) => {
-    const { username, password, email } = req.body;
-
+    const { username, password, email, role } = req.body;
+// Validate role
+if (!role) {
+  return res.status(400).json({ message: 'Role is required' });
+}
     try {
+        // Check if the user already exists
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
+
+        // Determine role based on username
+        let role = '';
+        if (username === 'superAdmin') {
+            role = 'superAdmin';
+        } else if (username === 'groupAdmin') {
+            role = 'groupAdmin';
+        } else {
+            role = 'chatUser'; // Default role for other users
+        }
+        
         // Generate a salt
         const salt = await bcrypt.genSalt(10);
 
@@ -17,10 +72,10 @@ router.post('/register', async (req, res) => {
 
         // Create a new user instance with the hashed password
         const newUser = new User({
-            id: new mongoose.Types.ObjectId(),
             username,
             password: hashedPassword, // Now hashedPassword is defined here
-            email
+            email,
+            role
         });
 
         console.log('New User Registered: ', username, email);
@@ -54,7 +109,7 @@ router.post('/login', async (req, res) => {
     }
 
     // If login is successful, you can send a success message or user details
-    res.status(200).json({ message: 'Login successful', user: { username: user.username, email: user.email } });
+    res.status(200).json({ message: 'Login successful', user: { username: user.username, email: user.email, role: user.role } });
   } catch (error) {
     console.error('Error logging in:', error);
     res.status(500).json({ message: 'Error logging in' });

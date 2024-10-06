@@ -77,7 +77,7 @@ router.post('/register', async (req, res) => {
   console.log('Registration attempt:', req.body); // Log the request body
   const { username, password, email } = req.body;
 
-  const newUser = new User({ id: new mongoose.Types.ObjectId(), username, password, email });
+  const newUser = new User({ username, password, email });
 
   try {
     await newUser.save(); // Save user to the database

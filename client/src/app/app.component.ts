@@ -37,7 +37,7 @@ export class AppComponent {
   username: string = '';
   password: string = '';
   loginError: string | null = null;
-  userRole: 'chatUser' | 'groupAdmin' | 'superAdmin' | '' = ''; // Manage user roles with string literals
+  userRole: 'chatUser' | 'groupAdmin' | 'superAdmin' | undefined; // Manage user roles with string literals
   message: string = '';
   messages: { username: string; message: string; }[] = [];
   channelMessages: { [channelName: string]: { username: string, text: string }[] } = {};
@@ -71,12 +71,16 @@ export class AppComponent {
     this.http.post('http://localhost:3000/api/login', loginData)
       .subscribe(
         (response: any) => {
+
+          console.log('Login Response:', response);
+
           // If login is successful
           this.isAuthenticated = true;
           this.userRole = response.user.role; // Get user role from response
           this.loginError = null;
           this.navigateTo('home'); // Redirect to home after successful login
           console.log('Login Successful, ', this.username);
+          console.log('Current User Role:', this.userRole);
         },
         (error) => {
           // If login fails
@@ -113,9 +117,6 @@ export class AppComponent {
 
   logout() {
     this.isAuthenticated = false;
-    this.username = '';
-    this.password = '';
-    this.userRole = ''; // Reset user role on logout
     this.chatUser = null; // Reset chat user info
     localStorage.removeItem('chatUsername');
     this.navigateTo('home'); // Redirect to home after logout
