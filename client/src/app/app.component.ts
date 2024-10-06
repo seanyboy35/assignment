@@ -228,34 +228,36 @@ createGroup(groupName: string = `Group ${this.groups.length + 1}`) {
 }
 
 
-  createChannel(channelName: string, groupId: string) {
-    // Create the channel object
-    const newChannel = { name: channelName, members: [] };
+createChannel(groupId: string) {
+  // Find the group in the local state
+  const group = this.groups.find(g => g._id === groupId); // Ensure you're using the correct identifier
 
-    // Find the group in local state
-    const group = this.groups.find(g => g._id === groupId); // Ensure you're using the correct identifier
+  if (group) {
+      // Determine the new channel number by checking the number of channels in the group
+      const newChannelNumber = group.channels.length + 1;
+      const newChannelName = `Channel ${newChannelNumber}`; // Sequential naming
 
-    if (group) {
-        // Update local state by adding the new channel
-        group.channels.push(newChannel);
-        console.log(`Channel created locally: ${channelName} in Group ${group.name}`);
+      // Create the new channel object
+      const newChannel = { name: newChannelName, members: [] };
 
-        // Call the backend to save the new channel
-        this.http.post('http://localhost:3000/api/create-channel', { name: channelName, groupId })
-            .subscribe(
-                (response: any) => {
-                    console.log('Channel created successfully:', response);
-                },
-                (error) => {
-                    console.error('Error creating channel:', error);
-                }
-            );
-    } else {
-        console.error(`Group with ID ${groupId} not found.`);
-    }
+      // Update local state by adding the new channel
+      group.channels.push(newChannel);
+      console.log(`Channel created locally: ${newChannelName} in Group ${group.name}`);
+
+      // Call the backend to save the new channel
+      this.http.post('http://localhost:3000/api/create-channel', { name: newChannelName, groupId })
+          .subscribe(
+              (response: any) => {
+                  console.log('Channel created successfully:', response);
+              },
+              (error) => {
+                  console.error('Error creating channel:', error);
+              }
+          );
+  } else {
+      console.error(`Group with ID ${groupId} not found.`);
+  }
 }
-
-
 
   removeGroup(groupName: string) {
     this.groups = this.groups.filter(g => g.name !== groupName);
