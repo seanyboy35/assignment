@@ -215,4 +215,15 @@ router.post('/create-channel', async (req, res) => {
   }
 });
 
+// Fetch all groups
+router.get('/groups', async (req, res) => {
+  try {
+    const groups = await Group.find().populate('channels'); // Adjust if channels need population
+    res.json(groups);
+  } catch (error) {
+    console.error('Error fetching groups:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 module.exports = router; // Export the router

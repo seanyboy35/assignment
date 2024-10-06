@@ -1,4 +1,4 @@
-import { Component, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Import FormsModule to use ngModel
 import { VideoChatComponent } from './video-chat/video-chat.component';
@@ -43,7 +43,7 @@ interface Group {
   providedIn: 'root'
 })
 
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'Chat Application';
   companyName: string = 'Your Company Name';
   currentSection: string = 'home';
@@ -557,9 +557,22 @@ createUser() {
     console.log(`Reporting to super admins: Banned member ${member} from channel ${channelName} in group ${groupName}`)
   }
 
+  loadGroups() {
+    this.http.get<any[]>('http://localhost:3000/api/groups') // Adjust your API endpoint accordingly
+      .subscribe(
+        (data) => {
+          this.groups = data; // Store fetched data in the groups array
+        },
+        (error) => {
+          console.error('Error fetching groups:', error);
+        }
+      );
+  }
+
   ngOnInit(): void {
     
     this.getUserData(); // Call the method here to fetch user data on initialization
+    this.loadGroups(); // Load groups when the component initializes
     // Listen for incoming messages from the server
     this.socketService.getMessages().subscribe(
       (msg: { username: string; message: string; }) => {
