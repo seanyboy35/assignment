@@ -195,37 +195,38 @@ getUserData() {
   }
 
   // Group Management functions
-  createGroup(groupName: string = `Group ${this.groups.length + 1}`) {
-    // Create the group object
-    const newGroup: { _id?: string, name: string, channels: any[], members: any[], requests: any[] } = {
-      _id: undefined, // Initialize _id as undefined
-      name: groupName,
-      channels: [],
-      members: [],
-      requests: []
+createGroup(groupName: string = `Group ${this.groups.length + 1}`) {
+  // Create the group object (without pushing it yet)
+  const newGroup: { _id?: string, name: string, channels: any[], members: any[], requests: any[] } = {
+    _id: undefined, // Initialize _id as undefined
+    name: groupName,
+    channels: [],
+    members: [],
+    requests: []
   };
-  
-    // Update local state
-    this.groups.push(newGroup);
-    console.log(`Group created: ${groupName}`);
-  
-    // Assume adminId is obtained from local storage or other sources
-    const adminId = localStorage.getItem('userId'); // Replace with your method of getting the admin ID
-  
-    // Call the backend to save the new group
-    this.http.post('http://localhost:3000/api/create-group', { name: groupName, adminId })
-      .subscribe(
-        (response: any) => {
-          // Assuming response contains the newly created group with _id
-          newGroup._id = response._id;  // Update the local object with the _id from DB
-          this.groups.push(newGroup);  // Update the local state
-          console.log('Group created successfully:', response);
-        },
-        (error) => {
-          console.error('Error creating group:', error);
-        }
-      );
-  }
+
+  console.log(`Creating group: ${groupName}`);
+
+  // Assume adminId is obtained from local storage or other sources
+  const adminId = localStorage.getItem('userId'); // Replace with your method of getting the admin ID
+
+  // Call the backend to save the new group
+  this.http.post('http://localhost:3000/api/create-group', { name: groupName, adminId })
+    .subscribe(
+      (response: any) => {
+        // Assuming response contains the newly created group with _id
+        newGroup._id = response._id;  // Update the local object with the _id from DB
+
+        // Now update the local state
+        this.groups.push(newGroup);  // Add the group to the list only after it's successfully created in the DB
+        console.log('Group created successfully:', response);
+      },
+      (error) => {
+        console.error('Error creating group:', error);
+      }
+    );
+}
+
 
   createChannel(channelName: string, groupId: string) {
     // Create the channel object

@@ -139,7 +139,7 @@
       
       <!-- Display for Group Admin and Super Admin -->
       <div *ngIf="userRole === 'superAdmin' || userRole === 'groupAdmin'">
-        <button (click)="createGroup()">Create Group</button>
+        <button type="button" (click)="createGroup()">Create Group</button>
 
         <!-- Display Created Groups -->
         <div *ngIf="groups.length > 0" class="groups-list">
