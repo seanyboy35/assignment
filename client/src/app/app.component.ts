@@ -392,7 +392,7 @@ createUser() {
 
         this.http.post('http://localhost:3000/api/register', newUser).subscribe(
             (response) => {
-                console.log('User registered:', newUsername);
+                console.log('User registered:', newUser);
                 this.username = newUsername;
                 this.password = newPassword;
                 this.login();
