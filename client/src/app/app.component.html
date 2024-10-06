@@ -147,8 +147,8 @@
           <!-- Loop through each group -->
           <ul>
             <li *ngFor="let group of groups">
-              {{ group.name }}
-              <button (click)="createChannel(group.name)">Create Channel</button>
+              <h3>{{ group.name }}</h3>
+              <button *ngIf="group._id" (click)="createChannel('New Channel', group._id)">Create Channel</button>
               <button (click)="removeGroup(group.name)">Remove Group</button>
               <!-- Members of Group -->
               <div>

@@ -1,6 +1,6 @@
 // routes.js
 const express = require('express');
-const { Group, Channel } = require('./models.js');
+const { Group, Channel } = require('./models');
 const { User } = require('./models');
 const mongoose = require('mongoose');
 const router = express.Router();
@@ -87,6 +87,44 @@ router.post('/register', async (req, res) => {
     res.status(400).send({ error: error.message });
   }
 });
+// Route to create a new group
+router.post('/api/create-group', (req, res) => {
+  const { name, adminId } = req.body; // Assuming adminId is passed from the request
 
+  const newGroup = new Group({ name, adminId });
+
+  newGroup.save()
+    .then(group => {
+      res.status(201).json({ message: 'Group created successfully!', group });
+    })
+    .catch(error => {
+      console.error('Error creating group:', error);
+      res.status(500).json({ message: 'Error creating group', error });
+    });
+});
+
+// Route to create a new channel
+router.post('/api/create-channel', (req, res) => {
+  const { name, groupId } = req.body; // Assuming groupId is passed from the request
+
+  const newChannel = new Channel({ name, groupId });
+
+  newChannel.save()
+    .then(channel => {
+      // Optionally update the corresponding group to include this channel
+      return Group.findByIdAndUpdate(
+        groupId,
+        { $push: { channels: channel._id } }, // Add channel ID to the group's channels array
+        { new: true }
+      );
+    })
+    .then(group => {
+      res.status(201).json({ message: 'Channel created successfully!', group });
+    })
+    .catch(error => {
+      console.error('Error creating channel:', error);
+      res.status(500).json({ message: 'Error creating channel', error });
+    });
+});
 module.exports = router;  // Export the router so it can be used in the main server file
 

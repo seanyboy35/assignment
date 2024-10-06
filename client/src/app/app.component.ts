@@ -17,7 +17,13 @@ interface User {
   groups: any[];     // An array of groups the user is part of
   channels: any[];   // An array of channels the user is part of
 }
-
+interface Group {
+  _id?: string; // Optional if it's not available until created
+  name: string;
+  channels: { name: string; members: string[] }[];
+  members: string[];
+  requests: string[];
+}
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -53,14 +59,14 @@ export class AppComponent {
   private apiUrl = 'http://localhost:3000/api/messages';
   userGroups: any[] = []; // Store user's groups
   userChannels: any[] = []; // Store user's channels
-
+  groups: Group[] = [];
+ 
   
   constructor(private socketService: SocketService, private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
     this.username = this.getUsername(); // Automatically get the username
   }
 
    // Updated to store groups and their associated channels
-  groups: { name: string, channels: { name: string, members: string[] }[], members: string[], requests: string[] }[] = [];
   chatUser: { username: string, publicUsername: string, groups: string[] } | null = null; // Stores the chat user's info
 
 
@@ -190,18 +196,65 @@ getUserData() {
 
   // Group Management functions
   createGroup(groupName: string = `Group ${this.groups.length + 1}`) {
-  this.groups.push({ name: groupName, channels: [], members: [], requests: [] });
-  console.log(`Group created: ${groupName}`);
+    // Create the group object
+    const newGroup: { _id?: string, name: string, channels: any[], members: any[], requests: any[] } = {
+      _id: undefined, // Initialize _id as undefined
+      name: groupName,
+      channels: [],
+      members: [],
+      requests: []
+  };
+  
+    // Update local state
+    this.groups.push(newGroup);
+    console.log(`Group created: ${groupName}`);
+  
+    // Assume adminId is obtained from local storage or other sources
+    const adminId = localStorage.getItem('userId'); // Replace with your method of getting the admin ID
+  
+    // Call the backend to save the new group
+    this.http.post('http://localhost:3000/api/create-group', { name: groupName, adminId })
+      .subscribe(
+        (response: any) => {
+          // Assuming response contains the newly created group with _id
+          newGroup._id = response._id;  // Update the local object with the _id from DB
+          this.groups.push(newGroup);  // Update the local state
+          console.log('Group created successfully:', response);
+        },
+        (error) => {
+          console.error('Error creating group:', error);
+        }
+      );
+  }
+
+  createChannel(channelName: string, groupId: string) {
+    // Create the channel object
+    const newChannel = { name: channelName, members: [] };
+
+    // Find the group in local state
+    const group = this.groups.find(g => g._id === groupId); // Ensure you're using the correct identifier
+
+    if (group) {
+        // Update local state by adding the new channel
+        group.channels.push(newChannel);
+        console.log(`Channel created locally: ${channelName} in Group ${group.name}`);
+
+        // Call the backend to save the new channel
+        this.http.post('http://localhost:3000/api/create-channel', { name: channelName, groupId })
+            .subscribe(
+                (response: any) => {
+                    console.log('Channel created successfully:', response);
+                },
+                (error) => {
+                    console.error('Error creating channel:', error);
+                }
+            );
+    } else {
+        console.error(`Group with ID ${groupId} not found.`);
+    }
 }
 
-  createChannel(groupName: string) {
-    const group = this.groups.find(g => g.name === groupName);
-    if (group) {
-      const newChannelName = `Channel ${group.channels.length + 1} of ${groupName}`;
-      group.channels.push({ name: newChannelName, members: [] });
-      console.log('Creating channel:', newChannelName);
-    }
-  }
+
 
   removeGroup(groupName: string) {
     this.groups = this.groups.filter(g => g.name !== groupName);
@@ -215,6 +268,32 @@ getUserData() {
       console.log('Removing channel:', channelName, 'from', groupName);
     }
   }
+  joinGroup(groupName: string) {
+    const userId = localStorage.getItem('userId'); // Get userId from localStorage
+    this.http.post('http://localhost:3000/api/join-group', { userId, groupName })
+      .subscribe(
+        (response: any) => {
+          console.log('Joined group successfully:', response);
+        },
+        (error) => {
+          console.error('Error joining group:', error);
+        }
+      );
+  }
+  
+  joinChannel(groupName: string, channelName: string) {
+    const userId = localStorage.getItem('userId'); // Get userId from localStorage
+    this.http.post('http://localhost:3000/api/join-channel', { userId, groupName, channelName })
+      .subscribe(
+        (response: any) => {
+          console.log('Joined channel successfully:', response);
+        },
+        (error) => {
+          console.error('Error joining channel:', error);
+        }
+      );
+}
+
 
   joinGroupRequest(groupName: string) {
     const group = this.groups.find(g => g.name === groupName);
@@ -320,25 +399,6 @@ getUserData() {
         this.chatUser.groups = this.chatUser.groups.filter(g => g !== groupName);
       }
       console.log('Removed user:', username, 'from group:', groupName);
-    }
-  }
-
-  joinChannel(groupName: string, channelName: string) {
-    const group = this.groups.find(g => g.name === groupName);
-    if (group) {
-      const channel = group.channels.find(c => c.name === channelName);
-      if (channel && this.chatUser?.groups?.includes(groupName)) {
-        if (this.chatUser.username && !channel.members.includes(this.chatUser.username)) {
-          channel.members.push(this.chatUser.username);
-          console.log('Joined channel:', channelName, 'in group:', groupName);
-        } else {
-          console.warn('Already a member of the channel or channel not found');
-        }
-      } else {
-        console.warn('User is not part of the group or group not found');
-      }
-    } else {
-      console.warn('Group not found:', groupName);
     }
   }
 

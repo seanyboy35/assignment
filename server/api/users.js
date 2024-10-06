@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { User } = require('../models'); // Ensure the path is correct
+const { User, Channel, Group } = require('../models'); // Ensure the path is correct
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
@@ -116,46 +116,103 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Add user to a group
+// Endpoint to join a group
 router.post('/join-group', async (req, res) => {
   const { userId, groupName } = req.body;
 
   try {
-      const user = await User.findById(userId);
-      if (!user) return res.status(404).json({ message: 'User not found' });
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
-      // Add group if not already in user's groups
-      if (!user.groups.includes(groupId)) {
-          user.groups.push(groupId);
-          await user.save();
-      }
+    // Check if groupName already exists in the user's groups
+    if (user.groups.includes(groupName)) {
+      return res.status(400).json({ message: 'Already a member of this group' });
+    }
 
-      res.status(200).json({ message: 'Group joined successfully', groups: user.groups });
+    user.groups.push(groupName); // Add the groupName to user's groups
+    await user.save(); // Save the updated user
+
+    res.status(200).json({ message: 'Joined group successfully', user });
   } catch (error) {
-      res.status(500).json({ message: 'Error joining group', error });
+    console.error('Error joining group:', error);
+    res.status(500).json({ message: 'Error joining group' });
   }
 });
 
-// Add user to a channel
-router.post('/join-channel', async (req, res) => {
+// Route to join a channel
+router.post('/joinChannel', async (req, res) => {
   const { userId, channelId } = req.body;
 
   try {
-      const user = await User.findById(userId);
-      if (!user) return res.status(404).json({ message: 'User not found' });
+    const user = await User.findById(userId);
+    const channel = await Channel.findById(channelId).populate('group'); // Fetch channel and its group
 
-      // Add channel if not already in user's channels
-      if (!user.channels.includes(channelId)) {
-          user.channels.push(channelId);
-          await user.save();
-      }
+    if (!user || !channel) {
+      return res.status(404).json({ message: 'User or Channel not found' });
+    }
 
-      res.status(200).json({ message: 'Channel joined successfully', channels: user.channels });
+    // Add channel to user
+    user.channels.push(channelId);
+
+    // Optionally, you might want to add the group to user if not already present
+    if (!user.groups.includes(channel.group._id)) {
+      user.groups.push(channel.group._id);
+    }
+
+    await user.save();
+    res.status(200).json({ message: 'Joined channel successfully', user });
   } catch (error) {
-      res.status(500).json({ message: 'Error joining channel', error });
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
+// Create a group
+router.post('/create-group', async (req, res) => {
+  try {
+      const { name, adminId } = req.body;
 
+      // Create a new group
+      const newGroup = new Group({
+          name,
+          adminId,
+          channels: [],
+          members: [],
+          requests: []
+      });
+
+      await newGroup.save();
+      res.status(201).json(newGroup);
+  } catch (error) {
+      console.error('Error creating group:', error);
+      res.status(500).json({ message: 'Error creating group' });
+  }
+});
+
+router.post('/create-channel', async (req, res) => {
+  try {
+    const { name, groupId } = req.body;
+
+    // Step 1: Create the new channel document
+    const newChannel = new Channel({
+      name,
+      groupId,
+      members: []  // Add default members if needed
+    });
+    await newChannel.save();
+
+    // Step 2: Update the corresponding group to include the new channel's _id
+    const group = await Group.findById(groupId);
+    group.channels.push(newChannel._id);
+    await group.save();
+
+    res.status(201).json(newChannel); // Send the newly created channel back
+  } catch (error) {
+    console.error('Error creating channel:', error);
+    res.status(500).json({ error: 'Failed to create channel' });
+  }
+});
 
 module.exports = router; // Export the router

@@ -15,13 +15,17 @@ const groupSchema = new mongoose.Schema({
   name: { type: String, required: true },
   admins: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   channels: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Channel' }],
+  memberIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  requests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });
 
 // Channel Schema
 const channelSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  group: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' },
+  name: String,
+  groupId: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' },
+  members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });
+
 
 // Message Schema
 const messageSchema = new mongoose.Schema({

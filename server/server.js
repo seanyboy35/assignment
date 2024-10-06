@@ -10,6 +10,7 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const messageRoutes = require('./api/messages');
 const userRoutes = require('./api/users');
+const channelsRouter = require('./routes');
 
 // Enable CORS for your entire Express app (optional)
 app.use(cors({
@@ -31,6 +32,7 @@ db.on('error', (err) => {
 app.use(bodyParser.json());  // Parse incoming JSON requests
 app.use(express.json());
 app.use('/api/messages', messageRoutes);
+app.use('/api/channels', channelsRouter);
 
 // User routes
 app.use('/api', userRoutes);
