@@ -120,6 +120,7 @@ export class AppComponent {
     this.chatUser = null; // Reset chat user info
     localStorage.removeItem('chatUsername');
     this.navigateTo('home'); // Redirect to home after logout
+    console.log(this.username, 'logged out successfully');
   }
 
   // Group Management functions
