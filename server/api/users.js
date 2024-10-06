@@ -109,12 +109,53 @@ router.post('/login', async (req, res) => {
     }
 
     // If login is successful, you can send a success message or user details
-    res.status(200).json({ message: 'Login successful', user: { username: user.username, email: user.email, role: user.role } });
+    res.status(200).json({ message: 'Login successful', user: { _id: user._id, username: user.username, email: user.email, role: user.role } });
   } catch (error) {
     console.error('Error logging in:', error);
     res.status(500).json({ message: 'Error logging in' });
   }
 });
+
+// Add user to a group
+router.post('/join-group', async (req, res) => {
+  const { userId, groupName } = req.body;
+
+  try {
+      const user = await User.findById(userId);
+      if (!user) return res.status(404).json({ message: 'User not found' });
+
+      // Add group if not already in user's groups
+      if (!user.groups.includes(groupId)) {
+          user.groups.push(groupId);
+          await user.save();
+      }
+
+      res.status(200).json({ message: 'Group joined successfully', groups: user.groups });
+  } catch (error) {
+      res.status(500).json({ message: 'Error joining group', error });
+  }
+});
+
+// Add user to a channel
+router.post('/join-channel', async (req, res) => {
+  const { userId, channelId } = req.body;
+
+  try {
+      const user = await User.findById(userId);
+      if (!user) return res.status(404).json({ message: 'User not found' });
+
+      // Add channel if not already in user's channels
+      if (!user.channels.includes(channelId)) {
+          user.channels.push(channelId);
+          await user.save();
+      }
+
+      res.status(200).json({ message: 'Channel joined successfully', channels: user.channels });
+  } catch (error) {
+      res.status(500).json({ message: 'Error joining channel', error });
+  }
+});
+
 
 
 module.exports = router; // Export the router

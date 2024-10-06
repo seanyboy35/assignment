@@ -40,7 +40,7 @@ app.get('/', (req, res) => {
   res.send('Welcome to the Chat Application!');
 });
 
-const { Message } = require('./models'); // Importing the Message model
+const { Message, User } = require('./models'); // Importing the Message model
 
 // Socket.IO connection handler
 io.on('connection', (socket) => {
@@ -97,6 +97,20 @@ app.post('/api/messages', async (req, res) => {
     res.status(500).json({ error: 'Error saving message to database' });
   }
 });
-
+// User retrieval route
+app.get('/users/:id', async (req, res) => {
+  try {
+    // Change this to a different variable name to avoid conflict
+    const userId = req.params.id; 
+    const foundUser = await User.findById(userId); // Fetch user from the database
+    if (!foundUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(foundUser); // Send the found user back as a response
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

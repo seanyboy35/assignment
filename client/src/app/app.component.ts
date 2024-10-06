@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Import FormsModule to use ngModel
 import { VideoChatComponent } from './video-chat/video-chat.component';
 import { UserManagementComponent } from './user-management/user-management.component';
@@ -9,6 +9,14 @@ import { Injectable } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClient, provideHttpClient, withFetch } from '@angular/common/http';
 import { Observable } from 'rxjs';
+
+interface User {
+  _id: string;       // The user's unique ID from MongoDB
+  username: string;  // The user's username
+  role: string;      // The user's role ('superAdmin', 'groupAdmin', 'chatUser')
+  groups: any[];     // An array of groups the user is part of
+  channels: any[];   // An array of channels the user is part of
+}
 
 @Component({
   selector: 'app-root',
@@ -37,14 +45,17 @@ export class AppComponent {
   username: string = '';
   password: string = '';
   loginError: string | null = null;
-  userRole: 'chatUser' | 'groupAdmin' | 'superAdmin' | undefined; // Manage user roles with string literals
+  userRole: string = '';  // Manage user roles with string literals
   message: string = '';
   messages: { username: string; message: string; }[] = [];
   channelMessages: { [channelName: string]: { username: string, text: string }[] } = {};
   newMessage: { [channelName: string]: string } = {};
   private apiUrl = 'http://localhost:3000/api/messages';
+  userGroups: any[] = []; // Store user's groups
+  userChannels: any[] = []; // Store user's channels
+
   
-  constructor(private socketService: SocketService, private http: HttpClient) {
+  constructor(private socketService: SocketService, private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
     this.username = this.getUsername(); // Automatically get the username
   }
 
@@ -52,6 +63,46 @@ export class AppComponent {
   groups: { name: string, channels: { name: string, members: string[] }[], members: string[], requests: string[] }[] = [];
   chatUser: { username: string, publicUsername: string, groups: string[] } | null = null; // Stores the chat user's info
 
+
+  
+// Method to fetch user details
+fetchUserDetails(userId: string) {
+  this.http.get<User>(`http://localhost:3000/users/${userId}`)
+    .subscribe(
+      user => {
+        this.userRole = user.role;
+        this.userGroups = user.groups;
+        this.userChannels = user.channels;
+        console.log('User Role:', this.userRole);
+        console.log('User Groups:', this.userGroups);
+        console.log('User Channels:', this.userChannels);
+      },
+      error => {
+        console.error('Error fetching user details:', error);
+      }
+    );
+}
+getUserData() {
+  if (isPlatformBrowser(this.platformId)) {
+    const userId = localStorage.getItem('userId');
+    const userRole = localStorage.getItem('userRole');
+  console.log('Fetching user data for userId:', userId); // Debugging log
+  if (userId) {
+    this.http.get<User>(`http://localhost:3000/users/${userId}`)
+      .subscribe(
+        (user) => {
+          console.log('User data retrieved:', user); // For debugging
+          this.userRole = user.role; // Set the user role from the response
+        },
+        (error) => {
+          console.error('Error retrieving user data:', error);
+        }
+      );
+  } else {
+    console.warn('User ID is not found in local storage.');
+  }
+}
+}
   initializeGroups() {
     // Sample groups initialized for demonstration
     this.groups = [
@@ -67,16 +118,30 @@ export class AppComponent {
       username: this.username,
       password: this.password
     };
-
+  
     this.http.post('http://localhost:3000/api/login', loginData)
       .subscribe(
         (response: any) => {
-
           console.log('Login Response:', response);
-
+  
           // If login is successful
           this.isAuthenticated = true;
-          this.userRole = response.user.role; // Get user role from response
+  
+          // Store userId in localStorage using the response object
+          if (isPlatformBrowser(this.platformId)) {
+            localStorage.setItem('userId', response.user._id); // Use response.user._id instead of user._id
+            localStorage.setItem('userRole', response.user.role); // Store userRole in localStorage
+          }
+          
+          // Fetch user role from response and ensure it's one of the expected values
+          const roleFromBackend = response.user.role;
+          if (roleFromBackend === 'chatUser' || roleFromBackend === 'groupAdmin' || roleFromBackend === 'superAdmin') {
+            this.userRole = roleFromBackend; // Set role if it's valid
+          } else {
+            this.userRole = 'chatUser'; // Handle unexpected roles
+          }
+  
+          this.fetchUserDetails(response.user._id); // Use the logged-in user's ID to fetch details
           this.loginError = null;
           this.navigateTo('home'); // Redirect to home after successful login
           console.log('Login Successful, ', this.username);
@@ -430,6 +495,8 @@ createUser() {
   }
 
   ngOnInit(): void {
+    
+    this.getUserData(); // Call the method here to fetch user data on initialization
     // Listen for incoming messages from the server
     this.socketService.getMessages().subscribe(
       (msg: { username: string; message: string; }) => {
