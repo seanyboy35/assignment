@@ -63,25 +63,26 @@ export class AppComponent {
   }
 
   login() {
-    const user = this.users.find(u => u.username === this.username && u.password === this.password);
-    if (user) {
-      this.isAuthenticated = true;
-      this.userRole = user.role;
-      this.loginError = null;
-      this.navigateTo('home'); // Redirect to home after successful login
-    } else if (this.username === 'super' && this.password === '123') {
-      this.isAuthenticated = true;
-      this.userRole = 'superAdmin'; // Set role for Super Admin
-      this.loginError = null;
-      this.navigateTo('home'); // Redirect to home after successful login
-    } else if (this.username === 'group' && this.password === '123') {
-      this.isAuthenticated = true;
-      this.userRole = 'groupAdmin'; // Set role for Group Admin
-      this.loginError = null;
-      this.navigateTo('home'); // Redirect to home after successful login
-    } else {
-      this.loginError = 'Invalid username or password. Please try again.';
-    }
+    const loginData = {
+      username: this.username,
+      password: this.password
+    };
+
+    this.http.post('http://localhost:3000/api/login', loginData)
+      .subscribe(
+        (response: any) => {
+          // If login is successful
+          this.isAuthenticated = true;
+          this.userRole = response.user.role; // Get user role from response
+          this.loginError = null;
+          this.navigateTo('home'); // Redirect to home after successful login
+          console.log('Login Successful, ', this.username);
+        },
+        (error) => {
+          // If login fails
+          this.loginError = error.error.message || 'Invalid username or password. Please try again.';
+        }
+      );
   }
 
   getOrCreateChatUser(username: string) {
