@@ -1,3 +1,4 @@
+//groups.js
 router.post('/requestJoin', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
 

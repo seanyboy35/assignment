@@ -1,3 +1,4 @@
+//users.js
 const express = require('express');
 const router = express.Router();
 const { User, Channel, Group } = require('../models'); // Ensure the path is correct
