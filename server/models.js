@@ -16,7 +16,7 @@ const groupSchema = new mongoose.Schema({
   admins: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   channels: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Channel' }],
   memberIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  requests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+  requests: { type: [String], default: []},
 });
 
 // Channel Schema

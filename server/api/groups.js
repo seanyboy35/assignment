@@ -1,4 +1,6 @@
 router.post('/requestJoin', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+
     const { username, groupName } = req.body;
     
     // Log received request for debugging

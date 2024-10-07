@@ -11,11 +11,12 @@ const io = socketIo(server);
 const messageRoutes = require('./api/messages');
 const userRoutes = require('./api/users');
 const channelsRouter = require('./routes');
+const {Group} = require('./models');
 
 // Enable CORS for your entire Express app (optional)
 app.use(cors({
   origin: "http://localhost:4200",  // Allow your Angular app (remove the trailing slash)
-  methods: ["GET", "POST"]
+  methods: ["GET", "POST", "PUT", "DELETE"]
 }));
 
 mongoose.connect('mongodb://localhost:27017/MyDB',{ useNewUrlParser: true, useUnifiedTopology: true })
@@ -114,5 +115,31 @@ app.get('/users/:id', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+app.post('/api/groups/requestJoin', async (req, res) => {
+  const { username, groupName } = req.body;
+  try {
+    // Fetch the group by its name
+    const group = await Group.findOne({ name: groupName });
+    if (!group) {
+      return res.status(404).json({ message: 'Group not found' });
+    }
+
+    // Add the user to the join requests if not already requested
+    if (!group.requests.includes(username)) {
+      group.requests.push(username);
+      await group.save();
+      return res.status(200).json({ message: 'Join request sent successfully' });
+    } else {
+      return res.status(400).json({ message: 'User has already requested to join this group' });
+    }
+  } catch (error) {
+    console.error('Error processing join request:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

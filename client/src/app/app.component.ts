@@ -9,6 +9,8 @@ import { Injectable } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClient, provideHttpClient, withFetch } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 interface User {
   _id: string;       // The user's unique ID from MongoDB
@@ -308,37 +310,38 @@ createChannel(groupId: string) {
 joinGroupRequest(groupName: string) {
   console.log('Join group request initiated for group:', groupName); // Debugging log
   const group = this.groups.find(g => g.name === groupName);
-  
+
   if (!group) {
-      console.error('Group not found:', groupName);
-      return; // Exit if group is not found
+    console.error('Group not found:', groupName);
+    return; // Exit if group is not found
   }
 
   console.log('Found group:', group); // Debugging log
 
   if (!this.chatUser) {
-      console.error('Chat user is not initialized.');
-      return; // Exit if chatUser is null
+    console.error('Chat user is not initialized.');
+    return; // Exit if chatUser is null
   }
 
   if (!group.requests.includes(this.chatUser.username)) {
-      group.requests.push(this.chatUser.username);
-      console.log('User joined request added:', this.chatUser.username); // Debugging log
+    group.requests.push(this.chatUser.username);
+    console.log('User join request added:', this.chatUser.username); // Debugging log
 
-      // Now send a request to the backend server
-      this.http.post(`/api/groups/requestJoin`, {
-          username: this.chatUser.username,
-          groupName: groupName
-      }).subscribe(
-          response => {
-              console.log('Join request sent successfully:', response);
-          },
-          error => {
-              console.error('Error sending join request:', error);
-          }
-      );
+    // Now send a request to the backend server
+    this.http.post(`http://localhost:3000/api/groups/requestJoin`, {
+      username: this.chatUser.username,
+      groupName: groupName
+    }).pipe(
+      tap(response => {
+        console.log('Join request sent successfully:', response);
+      }),
+      catchError(error => {
+        console.error('Error sending join request:', error);
+        return of(null); // Handle error and return a fallback value
+      })
+    ).subscribe();
   } else {
-      console.log('User has already requested to join this group:', this.chatUser.username); // Debugging log
+    console.log('User has already requested to join this group:', this.chatUser.username); // Debugging log
   }
 }
     

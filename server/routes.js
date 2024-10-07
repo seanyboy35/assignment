@@ -126,7 +126,8 @@ router.post('/api/create-channel', (req, res) => {
       res.status(500).json({ message: 'Error creating channel', error });
     });
 });
-router.post('/requestJoin', (req, res) => {
+router.post('groups/requestJoin', (req, res) => {
+  console.log("Request received for joining group");
   const { username, groupName } = req.body;
   
   // Log received request for debugging
