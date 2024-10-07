@@ -62,7 +62,10 @@
           <li *ngFor="let group of groups">
             {{ group.name }}
             <!-- Join group button -->
-            <button (click)="joinGroupRequest(group.name)" *ngIf="!chatUser?.groups?.includes(group.name)">Request to Join</button>
+<button (click)="joinGroupRequest(group.name)" *ngIf="!chatUser?.groups?.includes(group.name)">
+  Request to Join
+</button>
+
              <!-- Leave group button -->
             <button (click)="leaveGroup(group.name)" *ngIf="chatUser?.groups?.includes(group.name)">Leave Group</button>
              <!-- Group channels list -->

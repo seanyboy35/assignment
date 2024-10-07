@@ -132,7 +132,7 @@ getUserData() {
   
           // If login is successful
           this.isAuthenticated = true;
-  
+          
           // Store userId in localStorage using the response object
           if (isPlatformBrowser(this.platformId)) {
             localStorage.setItem('userId', response.user._id); // Use response.user._id instead of user._id
@@ -147,6 +147,13 @@ getUserData() {
             this.userRole = 'chatUser'; // Handle unexpected roles
           }
   
+          // Initialize the chatUser object here
+          this.chatUser = {
+          username: response.user.username,
+          publicUsername: response.user.username,
+          groups: []
+        };
+
           this.fetchUserDetails(response.user._id); // Use the logged-in user's ID to fetch details
           this.loginError = null;
           this.navigateTo('home'); // Redirect to home after successful login
@@ -298,19 +305,42 @@ createChannel(groupId: string) {
 }
 
 
-  joinGroupRequest(groupName: string) {
-    const group = this.groups.find(g => g.name === groupName);
-    if (group && this.chatUser) {
-      if (!group.requests.includes(this.chatUser.username)) {
-        group.requests.push(this.chatUser.username);
-        console.log('Requesting to join group:', groupName);
-      }
-      // Remove the join request button for the user
-      if (this.currentSection === 'groupManagement') {
-        this.chatUser.groups.push(groupName);
-      }
-    }
+joinGroupRequest(groupName: string) {
+  console.log('Join group request initiated for group:', groupName); // Debugging log
+  const group = this.groups.find(g => g.name === groupName);
+  
+  if (!group) {
+      console.error('Group not found:', groupName);
+      return; // Exit if group is not found
   }
+
+  console.log('Found group:', group); // Debugging log
+
+  if (!this.chatUser) {
+      console.error('Chat user is not initialized.');
+      return; // Exit if chatUser is null
+  }
+
+  if (!group.requests.includes(this.chatUser.username)) {
+      group.requests.push(this.chatUser.username);
+      console.log('User joined request added:', this.chatUser.username); // Debugging log
+
+      // Now send a request to the backend server
+      this.http.post(`/api/groups/requestJoin`, {
+          username: this.chatUser.username,
+          groupName: groupName
+      }).subscribe(
+          response => {
+              console.log('Join request sent successfully:', response);
+          },
+          error => {
+              console.error('Error sending join request:', error);
+          }
+      );
+  } else {
+      console.log('User has already requested to join this group:', this.chatUser.username); // Debugging log
+  }
+}
     
   leaveGroup(groupName: string) {
     const chatUsername = this.chatUser?.username;
