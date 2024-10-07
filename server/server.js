@@ -12,7 +12,7 @@ const io = socketIo(server);
 const messageRoutes = require('./api/messages');
 const userRoutes = require('./api/users');
 const channelsRouter = require('./routes');
-const {Group} = require('./models');
+const {Group, User} = require('./models');
 
 // Enable CORS for your entire Express app (optional)
 app.use(cors({
@@ -44,7 +44,7 @@ app.get('/', (req, res) => {
   res.send('Welcome to the Chat Application!');
 });
 
-const { Message, User } = require('./models'); // Importing the Message model
+const { Message } = require('./models'); // Importing the Message model
 
 // Socket.IO connection handler
 io.on('connection', (socket) => {
@@ -140,7 +140,32 @@ app.post('/api/groups/requestJoin', async (req, res) => {
   }
 });
 
+// Define the approve request route
+app.post('/api/groups/approve-request', async (req, res) => {
+  const { username, groupName } = req.body;
 
+  // Add your logic to approve the request here
+  try {
+    // Example logic to update user and group in MongoDB
+    const user = await User.findOne({ username });
+    const group = await Group.findOne({ name: groupName });
+
+    if (!user || !group) {
+      return res.status(404).json({ message: 'User or group not found' });
+    }
+
+    // Update group memberIds and user groups
+    group.memberIds.push(user._id);
+    user.groups.push(group._id);
+
+    await group.save();
+    await user.save();
+
+    res.json({ message: 'Request approved!' });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred' });
+  }
+});
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

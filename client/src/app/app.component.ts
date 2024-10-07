@@ -13,6 +13,7 @@ import { Observable } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
+
 interface User {
   _id: string;       // The user's unique ID from MongoDB
   username: string;  // The user's username
@@ -51,7 +52,8 @@ export class AppComponent implements OnInit {
   companyName: string = 'Your Company Name';
   currentSection: string = 'home';
   isAuthenticated: boolean = false;
-  username: string = '';
+  username: string;
+  groupName!: string;
   password: string = '';
   loginError: string | null = null;
   userRole: string = '';  // Manage user roles with string literals
@@ -63,16 +65,50 @@ export class AppComponent implements OnInit {
   userGroups: any[] = []; // Store user's groups
   userChannels: any[] = []; // Store user's channels
   groups: Group[] = [];
+  approvedUsers: string[] = [];  // Initialize the array in the class
  
   
   constructor(private socketService: SocketService, private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
     this.username = this.getUsername(); // Automatically get the username
+    
   }
 
    // Updated to store groups and their associated channels
   chatUser: { username: string, publicUsername: string, groups: string[] } | null = null; // Stores the chat user's info
 
+  getUserRequestedGroup() {
+    console.log(this.username);
+    console.log(this.groupName);
+    // Make a GET request to your API to fetch the user's requested groups
+    this.http.get<{ username: string, groupName: string }>('http://localhost:3000/api/user/requested-groups')
+      .subscribe(
+        (response) => {
+          this.username = response.username; // Assuming the response has a 'username' field
+          this.groupName = response.groupName; // Assuming the response has a 'groupName' field
+        },
+        (error) => {
+          console.error('Error fetching user requested group:', error);
+        }
+      );
+  }
 
+  approveRequest(username: string, groupName: string) {
+    
+    const payload = { username, groupName }; // Create the payload object
+    console.log(payload); // Ensure this is correctly set
+  
+
+    this.http.post(`http://localhost:3000/api/groups/approve-request`, payload).subscribe(
+      response => {
+        console.log('Request approved!', response); // Log the response
+        // Handle successful approval, e.g., show a message or refresh the list of requests
+      },
+      error => {
+        console.error('Error approving request', error); // Log the error
+        // Handle the error, e.g., show an error message
+      }
+    );
+  }
   
 // Method to fetch user details
 fetchUserDetails(userId: string) {
@@ -318,6 +354,9 @@ joinGroupRequest(groupName: string) {
   }
 
   console.log('Found group:', group); // Debugging log
+  console.log("Username:", this.username); // Ensure this is correctly set
+  console.log("Group Name:", groupName);   // This should not be undefined
+
 
   if (!this.chatUser) {
     console.error('Chat user is not initialized.');
@@ -398,24 +437,23 @@ joinGroupRequest(groupName: string) {
       }
     }
   }
-
-  approveRequest(groupName: string, username: string) {
-    const group = this.groups.find(g => g.name === groupName);
-    if (group) {
-      group.requests = group.requests.filter(r => r !== username);
-      group.members.push(username);
-      group.channels.forEach(channel => {
-        if (!channel.members.includes(username)) {
-          channel.members.push(username);
-        }
-      });
-      if (this.chatUser && this.chatUser.username === username) {
-        this.updateChatUserGroups(groupName); // Update chat user's groups
-      }
-      console.log('Approved request for user:', username, 'to join group:', groupName);
-    }
-  }
   
+  approveUser(username: string, groupName: string) {
+    // Assuming you have an array to hold approved users
+    if (!this.approvedUsers) {
+      this.approvedUsers = [];  // Initialize the array if it doesn't exist
+    }
+    
+    // Perform your API request here
+    this.http.post('/api/groups/approve-request', { username, groupName })
+      .subscribe(response => {
+        // If the response is successful
+        this.approvedUsers.push(username);  // Push the username to the array
+        console.log('Approved Users:', this.approvedUsers);
+      }, error => {
+        console.error(error);
+      });
+  }
 
   denyRequest(groupName: string, username: string) {
     const group = this.groups.find(g => g.name === groupName);
