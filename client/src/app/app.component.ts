@@ -77,8 +77,7 @@ export class AppComponent implements OnInit {
   
   constructor(private socketService: SocketService, private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
     this.username = this.getUsername(); // Automatically get the username
-    this.getChannels();
-  }
+      }
 
    // Updated to store groups and their associated channels
   chatUser: { username: string, publicUsername: string, groups: string[] } | null = null; // Stores the chat user's info
@@ -661,7 +660,7 @@ createUser() {
       .subscribe(
         (data) => {
           this.channels = data;
-          console.log('Channels fetched successfully:', this.channels);
+          console.log('Channels fetched successfully');
         },
         (error) => {
           console.error('Error fetching channels:', error);
