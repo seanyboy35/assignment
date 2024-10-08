@@ -53,7 +53,7 @@
     <section *ngIf="isAuthenticated && currentSection === 'home'" class="home-section">
       <h1>Home Page</h1>
       <!-- Home page content -->
-      <p>Use the navigation bar above to access different features of this application.</p>
+      <p>Navigate using the menu above to explore the application's features.</p>
       
       <!-- Chat User Specific Content -->
       <div *ngIf="userRole === 'chatUser'">
@@ -62,11 +62,12 @@
           <li *ngFor="let group of groups">
             {{ group.name }}
             <!-- Join group button -->
-<button (click)="joinGroupRequest(group.name)" *ngIf="!chatUser?.groups?.includes(group.name)">
-  Request to Join
-</button>
-
-             <!-- Leave group button -->
+            <button (click)="joinGroupRequest(group.name)" *ngIf="!chatUser?.groups?.includes(group.name)">
+              Request to Join
+            </button>
+            
+            
+            <!-- Leave group button -->
             <button (click)="leaveGroup(group.name)" *ngIf="chatUser?.groups?.includes(group.name)">Leave Group</button>
              <!-- Group channels list -->
             <ul *ngFor="let channel of group.channels">
@@ -88,6 +89,7 @@
 
 <hr>
 <br>
+<br>
 
       <!-- Admin view to manage group requests -->
       <div *ngIf="userRole === 'superAdmin' || userRole === 'groupAdmin'">
@@ -97,29 +99,41 @@
           <li *ngFor="let request of group.requests">
             {{ request }} requested to join {{ group.name }}
             <!-- Approve request button -->
-            <button (click)="approveRequest(request, group.name)">Approve</button>
+            <button (click)="approveRequest(group.name, request)">Approve</button>
             <!-- Deny request button -->
             <button (click)="denyRequest(group.name, request)">Deny</button>
           </li>
         </ul>
       </div>
-      <br><br><br><br><br><br><br>
+      <br><br>
       <hr>
       <!-- Button to delete the account -->
-<button (click)="deleteAccount()">Delete Account</button>
+      <button (click)="deleteAccount()">Delete Account</button>
     </section>
     
     <!-- Chat Section -->
      <!-- This section is only visible if the user is authenticated and the current section is 'chat' -->
 <section *ngIf="isAuthenticated && currentSection === 'chat'" class="chat-section">
   <h1>Chat Function</h1>
-  <div *ngFor="let group of groups" class="group-container">
-    <h2>{{ group.groupName }}</h2>  <!-- Display the group name -->
-    <ul>
-      <li *ngFor="let channel of group.channels">  <!-- Loop through the group's channels -->
-        {{ channel.channelName }}  <!-- Display the channel name -->
-      </li>
-    </ul>
+  <div *ngIf="userRole === 'superAdmin'">
+    <h3>Your Channels</h3>
+    <div class="chat-container">
+      <form (submit)="sendMessage(username, message)">
+        <input
+          type="text"
+          [(ngModel)]="message"
+          name="message"
+          placeholder="Type your message..."
+          required
+        />
+        <button type="submit">Send</button>
+      </form>
+      <ul class="chat-messages">
+        <li *ngFor="let msg of messages">
+          <strong>{{ msg.username }}:</strong> {{ message }}
+        </li>
+      </ul>
+    </div>
   </div>
 </section>
 
@@ -168,7 +182,7 @@
                 <ul>
                   <li *ngFor="let request of group.requests">
                     {{ request }}
-                    <button (click)="approveRequest(request, group.name)">Approve</button>
+                    <button (click)="approveRequest(group.name, request)">Approve</button>
                     <button (click)="denyRequest(group.name, request)">Deny</button>
                   </li>
                 </ul>
