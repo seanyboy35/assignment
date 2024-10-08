@@ -13,6 +13,11 @@ import { Observable } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
+interface Channel {
+  _id: string;
+  name: string;
+  members: string[];
+}
 
 interface User {
   _id: string;       // The user's unique ID from MongoDB
@@ -66,11 +71,13 @@ export class AppComponent implements OnInit {
   userChannels: any[] = []; // Store user's channels
   groups: Group[] = [];
   approvedUsers: string[] = [];  // Initialize the array in the class
+  channels: Channel[] = [];  // Initialize an empty array or assign the fetched channels
+
  
   
   constructor(private socketService: SocketService, private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
     this.username = this.getUsername(); // Automatically get the username
-    
+    this.getChannels();
   }
 
    // Updated to store groups and their associated channels
@@ -330,18 +337,23 @@ createChannel(groupId: string) {
       );
   }
   
-  joinChannel(groupName: string, channelName: string) {
-    const userId = localStorage.getItem('userId'); // Get userId from localStorage
-    this.http.post('http://localhost:3000/api/join-channel', { userId, groupName, channelName })
-      .subscribe(
-        (response: any) => {
-          console.log('Joined channel successfully:', response);
-        },
-        (error) => {
-          console.error('Error joining channel:', error);
+  joinChannel(channelId: string) {
+    const payload = { username: this.username, channelId };
+    console.log('Joining channel with ID:', channelId);
+    this.http.post('http://localhost:3000/api/channels/join', payload).subscribe(
+      (response) => {
+        console.log('Joined channel successfully!', response);
+
+        const channel = this.channels.find(c => c._id === channelId);
+        if (channel && !channel.members.includes(this.username)) {
+          channel.members.push(this.username); // Add the username to the channel's members
         }
-      );
-}
+      },
+      (error) => {
+        console.error('Error joining channel:', error);
+      }
+    );
+  }
 
 
 joinGroupRequest(groupName: string) {
@@ -500,11 +512,6 @@ joinGroupRequest(groupName: string) {
     }
   }
 
-  getChannels(groupName: string) {
-    const group = this.groups.find(g => g.name === groupName);
-    return group ? group.channels ?? [] : [];
-  }
-
   updateChatUserGroups(groupName: string) {
     if (this.chatUser && !this.chatUser.groups.includes(groupName)) {
       this.chatUser.groups.push(groupName);
@@ -608,12 +615,6 @@ createUser() {
     }
 }
 
-   
-  getChannel(groupName: string, channelName: string) {
-    const group = this.groups.find(g => g.name === groupName);
-    return group ? group.channels.find(c => c.name === channelName) : null;
-  }
-  
   saveMessagesToLocalStorage() {
     localStorage.setItem('channelMessages', JSON.stringify(this.channelMessages));
   }
@@ -642,9 +643,10 @@ createUser() {
   }
 
   ngOnInit(): void {
-    
+     
     this.getUserData(); // Call the method here to fetch user data on initialization
     this.loadGroups(); // Load groups when the component initializes
+    this.getChannels(); 
     // Listen for incoming messages from the server
     this.socketService.getMessages().subscribe(
       (msg: { username: string; message: string; }) => {
@@ -655,6 +657,19 @@ createUser() {
         console.error('Socket error: ', error);
       }
     );
+  }
+
+  getChannels() {
+    this.http.get<Channel[]>('http://localhost:3000/api/channels')
+      .subscribe(
+        (data) => {
+          this.channels = data;
+          console.log('Channels fetched successfully:', this.channels);
+        },
+        (error) => {
+          console.error('Error fetching channels:', error);
+        }
+      );
   }
 
 // Send a new message to the server

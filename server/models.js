@@ -24,7 +24,7 @@ const groupSchema = new mongoose.Schema({
 const channelSchema = new mongoose.Schema({
   name: String,
   groupId: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' },
-  members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+  members:  [{ type: String }] // Store usernames or user IDs
 });
 
 

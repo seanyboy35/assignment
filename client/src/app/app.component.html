@@ -72,7 +72,7 @@
             <ul *ngFor="let channel of group.channels">
               <li>
                 {{ channel.name }}
-                <button (click)="joinChannel(group.name, channel.name)" *ngIf="!channel.members.includes(chatUser?.username || '')">Join Channel</button>
+                <button (click)="joinChannel(channel._id)" *ngIf="!channel.members.includes(username)">Join Channel</button>
                 <button (click)="leaveChannel(group.name, channel.name)" *ngIf="channel.members.includes(chatUser?.username || '')">Leave Channel</button>
               </li>
             </ul>
@@ -200,7 +200,7 @@
             <ul *ngIf="group.channels.length > 0">
               <li *ngFor="let channel of group.channels">
                 {{ channel.name }}
-                <button (click)="joinChannel(group.name, channel.name)" *ngIf="!channel.members.includes(chatUser?.username || '')">Join Channel</button>
+                <button (click)="joinChannel(channel._id)" *ngIf="!channel.members.includes(username)">Join Channel</button>
                 <button (click)="leaveChannel(group.name, channel.name)" *ngIf="channel.members.includes(chatUser?.username || '')">Leave Channel</button>
               </li>
             </ul>
