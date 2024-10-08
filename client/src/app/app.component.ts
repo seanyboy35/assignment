@@ -283,25 +283,21 @@ createGroup(groupName: string = `Group ${this.groups.length + 1}`) {
 
 createChannel(groupId: string) {
   // Find the group in the local state
-  const group = this.groups.find(g => g._id === groupId); // Ensure you're using the correct identifier
+  const group = this.groups.find(g => g._id === groupId);
 
   if (group) {
       // Determine the new channel number by checking the number of channels in the group
       const newChannelNumber = group.channels.length + 1;
       const newChannelName = `Channel ${newChannelNumber}`; // Sequential naming
 
-      // Create the new channel object
-      const newChannel = { name: newChannelName, members: [] };
-
-      // Update local state by adding the new channel
-      group.channels.push(newChannel);
-      console.log(`Channel created locally: ${newChannelName} in Group ${group.name}`);
-
       // Call the backend to save the new channel
       this.http.post('http://localhost:3000/api/create-channel', { name: newChannelName, groupId })
           .subscribe(
               (response: any) => {
-                  console.log('Channel created successfully:', response);
+                  // Now we can push the response which includes the _id
+                  const createdChannel = { ...response }; // Assuming the backend returns the created channel with an _id
+                  group.channels.push(createdChannel);
+                  console.log(`Channel created: ${createdChannel.name} in Group ${group.name}`);
               },
               (error) => {
                   console.error('Error creating channel:', error);
@@ -311,6 +307,7 @@ createChannel(groupId: string) {
       console.error(`Group with ID ${groupId} not found.`);
   }
 }
+
 
   removeGroup(groupName: string) {
     this.groups = this.groups.filter(g => g.name !== groupName);
