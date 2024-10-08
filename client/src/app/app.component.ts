@@ -13,6 +13,7 @@ import { Observable } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
+
 interface Channel {
   _id: string;
   name: string;
@@ -76,6 +77,9 @@ export class AppComponent implements OnInit {
   channels: Channel[] = [];  // Initialize an empty array or assign the fetched channels
   messageText: string = '';
   currentChannel: string | null = null;
+  router: any;
+  userId: string = '';
+  userService: any;
  
   
   constructor(private socketService: SocketService, private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
@@ -144,15 +148,7 @@ getUserData() {
   console.log('Fetching user data for userId:', userId); // Debugging log
   if (userId) {
     this.http.get<User>(`http://localhost:3000/users/${userId}`)
-      .subscribe(
-        (user) => {
-          console.log('User data retrieved:', user); // For debugging
-          this.userRole = user.role; // Set the user role from the response
-        },
-        (error) => {
-          console.error('Error retrieving user data:', error);
-        }
-      );
+      
   } else {
     console.warn('User ID is not found in local storage.');
   }
@@ -440,15 +436,26 @@ joinGroupRequest(groupName: string) {
   }
 
   deleteAccount() {
-    if (this.chatUser) {
-      if (confirm('Are you sure you want to delete your account?')) {
-        console.log('Deleting account for user:', this.chatUser.username);
-        this.logout();
-      } else {
-        console.log('Account deletion cancelled.');
-      }
+    const userId = localStorage.getItem('userId');
+
+    console.log('Delete Account button clicked');
+    console.log('Current User ID:', userId); // Check the user ID being passed
+
+    if (userId) {
+        this.http.delete(`http://localhost:3000/api/users/deleteAccount/${userId}`).subscribe(
+            (response: any) => {
+                console.log('Response from deleteAccount:', response);
+                // Refresh the page after a successful delete
+                location.reload();
+            },
+            (error: any) => {
+                console.error('Error deleting account:', error);
+            }
+        );
+    } else {
+        console.error('No user ID found in localStorage');
     }
-  }
+}
   
   approveUser(username: string, groupName: string) {
     // Assuming you have an array to hold approved users
@@ -647,6 +654,7 @@ createUser() {
     this.getUserData(); // Call the method here to fetch user data on initialization
     this.loadGroups(); // Load groups when the component initializes
     this.getChannels(); 
+    
     
     // Listen for incoming messages from the server
     this.socketService.getMessages().subscribe(

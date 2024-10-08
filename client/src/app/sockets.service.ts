@@ -3,16 +3,18 @@ import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { isPlatformBrowser } from '@angular/common';
 
+
 @Injectable({
   providedIn: 'root',
 })
 export class SocketService {
   private socket: Socket | undefined;
+  private apiUrl = 'http://localhost:3000/api/users';
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     if (isPlatformBrowser(this.platformId)) {
       // Only connect to socket.io when in the browser
-      this.socket = io('http://localhost:3000', {
+      this.socket = io('http://localhost:3000/', {
         transports: ['websocket'],  // Force WebSocket
       });
 
@@ -64,7 +66,5 @@ export class SocketService {
       }
     });
   }
-
-
   
 }

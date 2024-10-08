@@ -214,72 +214,37 @@ app.get('/api/channels', async (req, res) => {
   }
 });
 
-// 1. Get all groups
-app.get('/api/groups', async (req, res) => {
+// DELETE endpoint to delete a user account
+// DELETE method to delete a user account
+app.delete('/api/users/deleteAccount/:userId', async (req, res) => {
+  const userId = req.params.userId;
+
   try {
-      const groups = await Group.find();
-      res.json(groups);
-  } catch (error) {
-      res.status(500).json({ error: error.message });
-  }
-});
+      // Remove user from Group and Channel references
+      await Group.updateMany({ 
+          $or: [{ memberIds: userId }, { admins: userId }] 
+      }, {
+          $pull: { memberIds: userId, admins: userId }
+      });
 
-// 2. Get messages for a channel
-app.get('/api/channels/:channelId/messages', async (req, res) => {
-  try {
-      const channelId = req.params.channelId;
-      const group = await Group.findOne({ 'channels._id': channelId }, { 'channels.$': 1 });
-      
-      if (group) {
-          const messages = group.channels[0].messages; // Get the messages of the specified channel
-          res.json(messages);
-      } else {
-          res.status(404).json({ error: 'Channel not found' });
-      }
-  } catch (error) {
-      res.status(500).json({ error: error.message });
-  }
-});
+      await Channel.updateMany({ 
+          members: userId 
+      }, {
+          $pull: { members: userId }
+      });
 
-// 3. Post a new message to a channel
-app.post('/api/channels/:channelId/messages', async (req, res) => {
-  try {
-      const channelId = req.params.channelId;
-      const { username, content } = req.body;
-
-      const group = await Group.findOneAndUpdate(
-          { 'channels._id': channelId },
-          { $push: { 'channels.$.messages': { username, content } } },
-          { new: true } // Return the updated group
-      );
-
-      if (group) {
-          res.status(201).json(group.channels[0].messages[group.channels[0].messages.length - 1]); // Return the newly added message
-      } else {
-          res.status(404).json({ error: 'Channel not found' });
-      }
-  } catch (error) {
-      res.status(500).json({ error: error.message });
-  }
-});
-
-app.get('/api/users/:username', async (req, res) => {
-  try {
-      const username = req.params.username;
-      const user = await User.findOne({ username }).populate('groups').populate('channels');
-      
+      // Delete the user
+      const user = await User.findByIdAndDelete(userId);
       if (!user) {
           return res.status(404).json({ message: 'User not found' });
       }
-
-      // Fetch all groups and channels that the user belongs to
-      const groups = await Group.find({ _id: { $in: user.groups } }).populate('channels');
-      return res.status(200).json(groups);
+      res.status(200).json({ message: 'User account deleted successfully' });
   } catch (error) {
-      console.error('Error fetching user data:', error);
-      return res.status(500).json({ message: 'Error fetching user data' });
+      console.error('Error deleting account:', error);
+      res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
