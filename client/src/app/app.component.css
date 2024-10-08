@@ -220,3 +220,22 @@ button:hover {
     scroll-behavior: smooth; /* Smooth scroll effect */   
     max-height: 300px;
   }
+
+  .group-container {
+    margin-bottom: 20px;
+  }
+  
+  .group-container h2 {
+    font-size: 1.5em;
+    color: #333;
+  }
+  
+  .group-container ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .group-container li {
+    padding: 5px 0;
+    font-size: 1.2em;
+  }

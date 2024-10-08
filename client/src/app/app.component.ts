@@ -13,10 +13,17 @@ import { Observable } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
+interface Message {
+  username: string;
+  content: string;
+  timestamp: Date;
+}
+
 interface Channel {
   _id: string;
   name: string;
   members: string[];
+  messages: Message[];
 }
 
 interface User {
@@ -29,7 +36,10 @@ interface User {
 interface Group {
   _id?: string; // Optional if it's not available until created
   name: string;
-  channels: { name: string; members: string[] }[];
+  channels: {
+    _id: string;
+    messages: Message[]; name: string; members: string[] 
+}[];
   members: string[];
   requests: string[];
 }
@@ -72,15 +82,39 @@ export class AppComponent implements OnInit {
   groups: Group[] = [];
   approvedUsers: string[] = [];  // Initialize the array in the class
   channels: Channel[] = [];  // Initialize an empty array or assign the fetched channels
-
+  selectedChannel: Channel | null = null;
  
   
   constructor(private socketService: SocketService, private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
     this.username = this.getUsername(); // Automatically get the username
+    this.fetchGroups();
       }
 
    // Updated to store groups and their associated channels
   chatUser: { username: string, publicUsername: string, groups: string[] } | null = null; // Stores the chat user's info
+
+  fetchGroups() {
+    this.http.get<Group[]>('http://localhost:3000/api/groups') // Adjust endpoint if necessary
+        .subscribe(groups => {
+            this.groups = groups;
+        }, error => {
+            console.error('Error fetching groups:', error);
+        });
+}
+
+fetchMessagesForChannel(channelId: string) {
+    this.http.get<Message[]>(`http://localhost:3000/api/channels/${channelId}/messages`).subscribe(
+        (messages) => {
+            const channel = this.groups.flatMap(group => group.channels).find(c => c._id === channelId);
+            if (channel) {
+                channel.messages = messages;
+            }
+        },
+        (error) => {
+            console.error('Error fetching messages for channel:', error);
+        }
+    );
+}
 
   getUserRequestedGroup() {
     console.log(this.username);
@@ -335,21 +369,39 @@ createChannel(groupId: string) {
   
   joinChannel(channelId: string) {
     const payload = { username: this.username, channelId };
-    console.log('Joining channel with ID:', channelId);
-    this.http.post('http://localhost:3000/api/channels/join', payload).subscribe(
-      (response) => {
-        console.log('Joined channel successfully!', response);
 
-        const channel = this.channels.find(c => c._id === channelId);
-        if (channel && !channel.members.includes(this.username)) {
-          channel.members.push(this.username); // Add the username to the channel's members
+    this.selectedChannel = this.groups.flatMap(group => group.channels).find(c => c._id === channelId) || null;
+
+    if (this.selectedChannel) {
+        this.fetchMessagesForChannel(channelId);
+    }
+
+    console.log('Joining channel with ID:', channelId);
+
+    this.http.post('http://localhost:3000/api/channels/join', payload).subscribe(
+        (response) => {
+            console.log('Joined channel successfully!', response);
+            // Refresh channels after joining
+            this.refreshUserChannels();
+        },
+        (error) => {
+            console.error('Error joining channel:', error);
         }
+    );
+}
+
+refreshUserChannels() {
+  this.http.get<Group[]>('http://localhost:3000/api/channels/user-channels?username=' + this.username).subscribe(
+      (channels) => {
+          this.groups = channels;
+          console.log('Fetched groups and channels:', this.groups); // Log the data
       },
       (error) => {
-        console.error('Error joining channel:', error);
+          console.error('Error fetching user channels:', error);
       }
-    );
-  }
+  );
+}
+
 
 
 joinGroupRequest(groupName: string) {
@@ -669,9 +721,19 @@ createUser() {
   }
 
 // Send a new message to the server
-sendMessage(username: string, text: string): void {
-  const messageObject = { username: username, text: text }; // Use the parameters correctly
-  this.socketService.sendMessage(messageObject); // Send the message object to the socket service
+sendMessage(channelId: string, messageContent: string) {
+  const message = { username: this.username, content: messageContent };
+  this.http.post<Message>(`http://localhost:3000/api/channels/${channelId}/messages`, message).subscribe(
+      (response) => {
+          const channel = this.groups.flatMap(group => group.channels).find(c => c._id === channelId);
+          if (channel) {
+              channel.messages.push(response); // Add new message to channel's messages
+          }
+      },
+      (error) => {
+          console.error('Error sending message:', error);
+      }
+  );
 }
 
 // Retrieve all messages from the server

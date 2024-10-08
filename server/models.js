@@ -1,15 +1,20 @@
 //models.js
 const mongoose = require('mongoose');
 
-const userSchema = new mongoose.Schema({
+// Message Schema
+const messageSchema = new mongoose.Schema({
   username: { type: String, required: true },
-  email: { type: String, required: true, unique: true }, // Ensure email is unique as well
-  password: { type: String, required: true },
-  role: { type: String, required: true },
-  groups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],  // Groups the user belongs to
-  channels: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Channel' }]  // Channels the user belongs to
+  text: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now },
 });
 
+// Channel Schema
+const channelSchema = new mongoose.Schema({
+  name: String,
+  groupId: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' },
+  members:  [{ type: String }], // Store usernames or user IDs
+  messages: { type: [messageSchema], default: [] } // Array of messages
+});
 
 // Group Schema
 const groupSchema = new mongoose.Schema({
@@ -20,19 +25,13 @@ const groupSchema = new mongoose.Schema({
   requests: { type: [String], default: []},
 });
 
-// Channel Schema
-const channelSchema = new mongoose.Schema({
-  name: String,
-  groupId: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' },
-  members:  [{ type: String }] // Store usernames or user IDs
-});
-
-
-// Message Schema
-const messageSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
   username: { type: String, required: true },
-  text: { type: String, required: true },
-  timestamp: { type: Date, default: Date.now },
+  email: { type: String, required: true, unique: true }, // Ensure email is unique as well
+  password: { type: String, required: true },
+  role: { type: String, required: true },
+  groups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],  // Groups the user belongs to
+  channels: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Channel' }]  // Channels the user belongs to
 });
 
 // Creating models from the schemas
