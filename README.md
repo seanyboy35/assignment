@@ -46,7 +46,7 @@ The chat system has three levels of permissions:
   - Can register interest in groups and leave groups.
 
 ## User Authentication
-- Initial setup includes a Super Admin with the username `super` and password `123`.
+- Initial setup includes a Super Admin with the username `superAdmin` and password `123`.
 - Users must authenticate with a username and password.
 - Authenticated users can access features based on their role.
 
