@@ -1,0 +1,11 @@
+<div>
+    <h2>Video Chat</h2>
+    <div id="peer-id" style="margin-bottom: 10px;"></div>
+    <div>
+      <input #peerIdInput type="text" placeholder="Enter Peer ID to call" />
+      <button (click)="startCall(peerIdInput.value)">Call User</button>
+      <button (click)="startScreenShare(peerIdInput.value)">Share Screen</button> <!-- Screen share button -->
+    </div>
+    <div id="remote-video-container" style="margin-top: 20px;"></div>
+    <video *ngIf="localStream" [srcObject]="localStream" autoplay style="width: 300px; height: 200px; border: 1px solid black;"></video>
+</div>
