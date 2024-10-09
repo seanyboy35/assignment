@@ -154,40 +154,17 @@
             <li *ngFor="let group of groups">
               <h3>{{ group.name }}</h3>
               <button *ngIf="group._id" (click)="createChannel(group._id)">Create Channel</button>
-              <!-- Members of Group -->
+              
               <div>
-                <strong>Members of Group:</strong>
-                <ul>
-                  <li *ngFor="let member of group.members">
-                    {{ member }}
-                    <button (click)="removeMember(group.name, member)">Remove</button>
-                  </li>
-                </ul>
+                
               </div>
               <!-- Channels and Members -->
               <div *ngFor="let channel of group.channels">
-                <strong>Members of Channel: {{ channel.name }}:</strong>
-                <ul>
-                  <li *ngFor="let member of channel.members">
-                    {{ member }}
-                    <button (click)="removeMember(group.name, member)">Remove</button>
-                    <button (click)="banMember(group.name, channel.name, member)">Ban and Report</button>
-                  </li>
-                </ul>
+                <strong>{{ channel.name }}:</strong>
+                
                 <!-- Example template to display channels -->
                 <button (click)="deleteChannel(channel._id)">Delete Channel</button>
 
-              </div>
-              <!-- Manage Requests -->
-              <div>
-                <strong>Requests:</strong>
-                <ul>
-                  <li *ngFor="let request of group.requests">
-                    {{ request }}
-                    <button (click)="approveRequest(request, group.name)">Approve</button>
-                    <button (click)="denyRequest(request, group.name)">Deny</button>
-                  </li>
-                </ul>
               </div>
             </li>
           </ul>
