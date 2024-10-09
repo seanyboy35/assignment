@@ -69,7 +69,7 @@ export class AppComponent implements OnInit {
   messages: { username: string; message: string; }[] = [];
   channelMessages: { [channelName: string]: { username: string, text: string }[] } = {};
   newMessage: { [channelName: string]: string } = {};
-  private apiUrl = 'http://localhost:3000/api/messages';
+  private apiUrl = 'http://localhost:5000/api/messages';
   userGroups: any[] = []; // Store user's groups
   userChannels: any[] = []; // Store user's channels
   groups: Group[] = [];
@@ -94,7 +94,7 @@ export class AppComponent implements OnInit {
     console.log(this.username);
     console.log(this.groupName);
     // Make a GET request to your API to fetch the user's requested groups
-    this.http.get<{ username: string, groupName: string }>('http://localhost:3000/api/user/requested-groups')
+    this.http.get<{ username: string, groupName: string }>('http://localhost:5000/api/user/requested-groups')
       .subscribe(
         (response) => {
           this.username = response.username; // Assuming the response has a 'username' field
@@ -112,7 +112,7 @@ export class AppComponent implements OnInit {
     console.log(payload); // Ensure this is correctly set
   
 
-    this.http.post(`http://localhost:3000/api/groups/approve-request`, payload).subscribe(
+    this.http.post(`http://localhost:5000/api/groups/approve-request`, payload).subscribe(
       response => {
         console.log('Request approved!', response); // Log the response
         // Handle successful approval, e.g., show a message or refresh the list of requests
@@ -128,7 +128,7 @@ export class AppComponent implements OnInit {
       }
     );
 
-    this.http.post(`http://localhost:3000/api/groups/remove-from-requests`, payload).subscribe(
+    this.http.post(`http://localhost:5000/api/groups/remove-from-requests`, payload).subscribe(
       response => {
         console.log('deleted user!', response); // Log the response
         // Handle successful approval, e.g., show a message or refresh the list of requests
@@ -147,7 +147,7 @@ export class AppComponent implements OnInit {
   
 // Method to fetch user details
 fetchUserDetails(userId: string) {
-  this.http.get<User>(`http://localhost:3000/users/${userId}`)
+  this.http.get<User>(`http://localhost:5000/users/${userId}`)
     .subscribe(
       user => {
         this.userRole = user.role;
@@ -168,7 +168,7 @@ getUserData() {
     const userRole = localStorage.getItem('userRole');
   console.log('Fetching user data for userId:', userId); // Debugging log
   if (userId) {
-    this.http.get<User>(`http://localhost:3000/users/${userId}`)
+    this.http.get<User>(`http://localhost:5000/users/${userId}`)
       .subscribe(
         (user) => {
           console.log('User data retrieved:', user); // For debugging
@@ -199,7 +199,7 @@ getUserData() {
       password: this.password
     };
   
-    this.http.post('http://localhost:3000/api/login', loginData)
+    this.http.post('http://localhost:5000/api/login', loginData)
       .subscribe(
         (response: any) => {
           console.log('Login Response:', response);
@@ -292,7 +292,7 @@ createGroup(groupName: string = `Group ${this.groups.length + 1}`) {
   const adminId = localStorage.getItem('userId'); // Replace with your method of getting the admin ID
 
   // Call the backend to save the new group
-  this.http.post('http://localhost:3000/api/create-group', { name: groupName, adminId })
+  this.http.post('http://localhost:5000/api/create-group', { name: groupName, adminId })
     .subscribe(
       (response: any) => {
         // Assuming response contains the newly created group with _id
@@ -301,6 +301,7 @@ createGroup(groupName: string = `Group ${this.groups.length + 1}`) {
         // Now update the local state
         this.groups.push(newGroup);  // Add the group to the list only after it's successfully created in the DB
         console.log('Group created successfully:', response);
+        alert ('Group created successfully');
       },
       (error) => {
         console.error('Error creating group:', error);
@@ -319,13 +320,14 @@ createChannel(groupId: string) {
       const newChannelName = `Channel ${newChannelNumber}`; // Sequential naming
 
       // Call the backend to save the new channel
-      this.http.post('http://localhost:3000/api/create-channel', { name: newChannelName, groupId })
+      this.http.post('http://localhost:5000/api/create-channel', { name: newChannelName, groupId })
           .subscribe(
               (response: any) => {
                   // Now we can push the response which includes the _id
                   const createdChannel = { ...response }; // Assuming the backend returns the created channel with an _id
                   group.channels.push(createdChannel);
                   console.log(`Channel created: ${createdChannel.name} in Group ${group.name}`);
+                  alert ('Channel created successfully');
               },
               (error) => {
                   console.error('Error creating channel:', error);
@@ -349,12 +351,14 @@ createChannel(groupId: string) {
       console.log('Removing channel:', channelName, 'from', groupName);
     }
   }
+
   joinGroup(groupName: string) {
     const userId = localStorage.getItem('userId'); // Get userId from localStorage
-    this.http.post('http://localhost:3000/api/join-group', { userId, groupName })
+    this.http.post('http://localhost:5000/api/join-group', { userId, groupName })
       .subscribe(
         (response: any) => {
           console.log('Joined group successfully:', response);
+          alert('Joined group successfully');
         },
         (error) => {
           console.error('Error joining group:', error);
@@ -365,9 +369,10 @@ createChannel(groupId: string) {
   joinChannel(channelId: string) {
     const payload = { username: this.username, channelId };
     console.log('Joining channel with ID:', channelId);
-    this.http.post('http://localhost:3000/api/channels/join', payload).subscribe(
+    this.http.post('http://localhost:5000/api/channels/join', payload).subscribe(
       (response) => {
         console.log('Joined channel successfully!', response);
+        alert('Joined channel successfully');
 
         const channel = this.channels.find(c => c._id === channelId);
         if (channel && !channel.members.includes(this.username)) {
@@ -405,12 +410,13 @@ joinGroupRequest(groupName: string) {
     console.log('User join request added:', this.chatUser.username); // Debugging log
 
     // Now send a request to the backend server
-    this.http.post(`http://localhost:3000/api/groups/requestJoin`, {
+    this.http.post(`http://localhost:5000/api/groups/requestJoin`, {
       username: this.chatUser.username,
       groupName: groupName
     }).pipe(
       tap(response => {
         console.log('Join request sent successfully:', response);
+        alert('Join request sent successfully');
       }),
       catchError(error => {
         console.error('Error sending join request:', error);
@@ -471,9 +477,10 @@ joinGroupRequest(groupName: string) {
     console.log('Current User ID:', userId); // Check the user ID being passed
 
     if (userId) {
-        this.http.delete(`http://localhost:3000/api/users/deleteAccount/${userId}`).subscribe(
+        this.http.delete(`http://localhost:5000/api/users/deleteAccount/${userId}`).subscribe(
             (response: any) => {
                 console.log('Response from deleteAccount:', response);
+                alert('Account Deleted');
                 // Refresh the page after a successful delete
                 location.reload();
             },
@@ -493,7 +500,7 @@ deleteUser() {
 
   if (usernameToDelete) {
       // Replace the placeholder with the actual username
-      this.http.delete(`http://localhost:3000/api/users/deleteUser/${usernameToDelete}`).subscribe(
+      this.http.delete(`http://localhost:5000/api/users/deleteUser/${usernameToDelete}`).subscribe(
           (response: any) => {
               console.log('Response from deleteAccount:', response);
               alert(`User ${usernameToDelete} has been deleted successfully.`);
@@ -524,6 +531,7 @@ deleteUser() {
         // If the response is successful
         this.approvedUsers.push(username);  // Push the username to the array
         console.log('Approved Users:', this.approvedUsers);
+        alert('User Approved');
       }, error => {
         console.error(error);
       });
@@ -534,7 +542,7 @@ deleteUser() {
     const payload = { username, groupName }; // Create the payload object
     console.log(payload); // Ensure this is correctly set
   
-    this.http.post(`http://localhost:3000/api/groups/remove-from-requests`, payload).subscribe(
+    this.http.post(`http://localhost:5000/api/groups/remove-from-requests`, payload).subscribe(
       response => {
         console.log('deleted user!', response); // Log the response
         // Handle successful approval, e.g., show a message or refresh the list of requests
@@ -543,6 +551,7 @@ deleteUser() {
         if (group) {
           group.requests = group.requests.filter(request => request !== username);
         }
+        alert('User Denied');
       },
       error => {
         console.error('Error deleting user', error); // Log the error
@@ -629,7 +638,7 @@ promoteUser() {
   console.log('Username to promote:', usernameToPromote);
 
   if (usernameToPromote) {
-      this.http.patch(`http://localhost:3000/api/users/promote/${usernameToPromote}`, {}).subscribe(
+      this.http.patch(`http://localhost:5000/api/users/promote/${usernameToPromote}`, {}).subscribe(
           (response: any) => {
               console.log('Response from promote:', response);
               alert(`User ${usernameToPromote} has been promoted.`);
@@ -653,7 +662,7 @@ demoteUser() {
   console.log('Username to demote:', usernameToDemote);
 
   if (usernameToDemote) {
-      this.http.patch(`http://localhost:3000/api/users/demote/${usernameToDemote}`, {}).subscribe(
+      this.http.patch(`http://localhost:5000/api/users/demote/${usernameToDemote}`, {}).subscribe(
           (response: any) => {
               console.log('Response from demote:', response);
               alert(`User ${usernameToDemote} has been demoted.`);
@@ -686,7 +695,7 @@ demoteUser() {
             role: 'chatUser' as 'chatUser'
         };
 
-        this.http.post('http://localhost:3000/api/register', newUser).subscribe(
+        this.http.post('http://localhost:5000/api/register', newUser).subscribe(
             (response) => {
                 console.log('User registered:', newUser);
                 this.username = newUsername;
@@ -718,7 +727,7 @@ demoteUser() {
   }
 
   loadGroups() {
-    this.http.get<any[]>('http://localhost:3000/api/groups') // Adjust your API endpoint accordingly
+    this.http.get<any[]>('http://localhost:5000/api/groups') // Adjust your API endpoint accordingly
       .subscribe(
         (data) => {
           this.groups = data; // Store fetched data in the groups array
@@ -749,11 +758,10 @@ demoteUser() {
   }
 
   getChannels() {
-    this.http.get<Channel[]>('http://localhost:3000/api/channels')
+    this.http.get<Channel[]>('http://localhost:5000/api/channels')
       .subscribe(
         (data) => {
           this.channels = data;
-          console.log('Channels fetched successfully:', this.channels);
         },
         (error) => {
           console.error('Error fetching channels:', error);
