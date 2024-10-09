@@ -144,6 +144,7 @@
       <!-- Display for Group Admin and Super Admin -->
       <div *ngIf="userRole === 'superAdmin' || userRole === 'groupAdmin'">
         <button type="button" (click)="createGroup()">Create Group</button>
+        <button (click)="deleteGroup()">Delete Group</button>
 
         <!-- Display Created Groups -->
         <div *ngIf="groups.length > 0" class="groups-list">
@@ -153,7 +154,6 @@
             <li *ngFor="let group of groups">
               <h3>{{ group.name }}</h3>
               <button *ngIf="group._id" (click)="createChannel(group._id)">Create Channel</button>
-              <button (click)="removeGroup(group.name)">Remove Group</button>
               <!-- Members of Group -->
               <div>
                 <strong>Members of Group:</strong>
@@ -174,7 +174,9 @@
                     <button (click)="banMember(group.name, channel.name, member)">Ban and Report</button>
                   </li>
                 </ul>
-                <button (click)="removeChannel(group.name, channel.name)">Remove Channel</button>
+                <!-- Example template to display channels -->
+                <button (click)="deleteChannel(channel._id)">Delete Channel</button>
+
               </div>
               <!-- Manage Requests -->
               <div>

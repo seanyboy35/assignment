@@ -36,6 +36,7 @@ _id: string; name: string; members: string[]
   members: string[];
   requests: string[];
 }
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -344,13 +345,22 @@ createChannel(groupId: string) {
     console.log('Removing group:', groupName);
   }
 
-  removeChannel(groupName: string, channelName: string) {
-    const group = this.groups.find(g => g.name === groupName);
-    if (group) {
-      group.channels = group.channels.filter(c => c.name !== channelName);
-      console.log('Removing channel:', channelName, 'from', groupName);
+  deleteChannel(channelId: string) {
+    if (confirm('Are you sure you want to delete this channel?')) {
+        this.http.delete(`http://localhost:3000/api/channels/delete/${channelId}`).subscribe(
+            (response: any) => {
+                console.log('Response from deleteChannel:', response);
+                // Remove the deleted channel from the channels array
+                this.channels = this.channels.filter(channel => channel._id !== channelId);
+                alert(`Channel with ID ${channelId} has been deleted successfully.`);
+            },
+            (error: any) => {
+                console.error('Error deleting channel:', error);
+                alert(`Error deleting channel. Please try again.`);
+            }
+        );
     }
-  }
+}
 
   joinGroup(groupName: string) {
     const userId = localStorage.getItem('userId'); // Get userId from localStorage
@@ -743,6 +753,7 @@ demoteUser() {
     this.getUserData(); // Call the method here to fetch user data on initialization
     this.loadGroups(); // Load groups when the component initializes
     this.getChannels(); 
+    this.fetchGroups(); // Fetch the list of groups when the component initializes
     
     
     // Listen for incoming messages from the server
@@ -769,6 +780,7 @@ demoteUser() {
       );
   }
 
+
 // Send a new message to the server
 sendMessage(username: string, text: string): void {
   const messageObject = { username: username, text: text }; // Use the parameters correctly
@@ -785,4 +797,41 @@ getMessages(): Observable<any> {
     // For example, you might get it from local storage or a service
     return 'username'; // Replace with actual logic to get the username
   }
+
+  deleteGroup() {
+  const groupNameToDelete = prompt('Enter the group name to delete:'); // Prompt for group name
+
+  console.log('Delete Group button clicked');
+  console.log('Group name to delete:', groupNameToDelete);
+
+  if (groupNameToDelete) {
+    this.http.delete(`http://localhost:3000/api/groups/delete/${groupNameToDelete}`).subscribe(
+      (response: any) => {
+        console.log('Response from deleteGroup:', response);
+        alert(`Group ${groupNameToDelete} has been deleted.`);
+        
+        // Update the groups list after deletion
+        this.groups = this.groups.filter(group => group.name !== groupNameToDelete); // Corrected filtering
+      },
+      (error: any) => {
+        console.error('Error deleting group:', error);
+        alert(`Error deleting group: ${groupNameToDelete}. Please try again.`);
+      }
+    );
+  } else {
+    console.error('No group name entered');
+    alert('Please enter a group name to delete.');
+  }
+}
+
+fetchGroups() {
+  this.http.get<Group[]>(`http://localhost:3000/api/groups`).subscribe(
+    (data: Group[]) => {
+      this.groups = data; // Direct assignment if data is already of type Group[]
+    },
+    (error: any) => {
+      console.error('Error fetching groups:', error);
+    }
+  );
+}
 }

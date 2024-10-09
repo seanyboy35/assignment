@@ -371,5 +371,49 @@ app.patch('/api/users/demote/:username', async (req, res) => {
   }
 });
 
+// DELETE method to delete a group
+app.delete('/api/groups/delete/:groupName', async (req, res) => {
+  const groupName = req.params.groupName;
+
+  try {
+      // Find and delete the group by its name
+      const result = await Group.findOneAndDelete({ name: groupName });
+
+      if (!result) {
+          return res.status(404).json({ message: 'Group not found' });
+      }
+
+      res.status(200).json({ message: `Group ${groupName} deleted successfully` });
+  } catch (error) {
+      console.error('Error deleting group:', error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// DELETE method to delete a channel
+app.delete('/api/channels/delete/:channelId', async (req, res) => {
+  const channelId = req.params.channelId;
+
+  try {
+      // Find the channel and delete it
+      const deletedChannel = await Channel.findByIdAndDelete(channelId);
+      if (!deletedChannel) {
+          return res.status(404).json({ message: 'Channel not found' });
+      }
+
+      // Remove the channel ID from the groups that contain it
+      await Group.updateMany(
+          { channels: channelId }, // Find groups that have the channel
+          { $pull: { channels: channelId } } // Remove the channel ID from the array
+      );
+
+      res.status(200).json({ message: 'Channel deleted successfully' });
+  } catch (error) {
+      console.error('Error deleting channel:', error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
