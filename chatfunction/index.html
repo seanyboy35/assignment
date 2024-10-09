@@ -5,23 +5,161 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Socket.IO Chat with Avatar</title>
     <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e9ecef;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            background-color: #72c9f7;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        footer {
+            width: 100%;
+            background-color: #72c9f7;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+
+        #chat {
+            width: 90%;
+            max-width: 600px;
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+            margin-top: 20px;
+            margin-bottom: 20px;
+            overflow-y: auto;
+            height: 400px;
+            border: 1px solid #dee2e6;
+        }
+
+        .message-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid #ddd;
+            object-fit: cover;
+        }
+
+        .username {
+            font-weight: bold;
+            color: #495057;
+            margin-right: 5px;
+        }
+
+        input[type="text"], input[type="file"], button {
+            width: 90%;
+            max-width: 600px;
+            margin: 8px 0;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            box-sizing: border-box;
+            background-color: #f8f9fa;
+        }
+
+        input[type="text"]::placeholder {
+            color: #adb5bd;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0069d9;
+        }
+        
+        #sendMessage, #sendImage {
+            width: 49%;
+            margin: 5px;
+        }
+        
+        #messageInput, #imageInput {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        #joinRoom {
+            width: calc(90% - 20px);
+            margin-top: 10px;
+        }
+
+        .input-container {
+            width: 90%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>    
 </head>
 <body>
-    Username:
-    <input id="usernameInput" placeholder="Enter your username" style="margin-bottom: 10px;"/><br />
-    Upload Profile Picture:
-    <input type="file" id="avatarInput" style="margin-bottom: 10px;"/><br />
-    Room Name:
-    <input id="roomInput" placeholder="Enter room name" style="margin-bottom: 10px;"/><br />
-    <button id="joinRoom" style="margin-bottom: 20px;">Join Room</button><br />
+    <header>
+        <h1>Chat Room</h1>
+    </header>
+    <br>
+    Enter Username Below:
+    <input id="usernameInput" placeholder="Enter your username" type="text" />
+    <br>
+    Upload Avatar:
+    <input type="file" id="avatarInput" />
+    <br>
+    Enter Room Name Below:
+    <input id="roomInput" placeholder="Enter room name" type="text" />
+    <button id="joinRoom">Join Room</button>
 
-    <div id="chat" style="margin-bottom: 20px;"></div>
+    <div id="chat"></div>
     
-    <input id="messageInput" placeholder="Type a message" style="margin-right: 5px;"/>
+    <input id="messageInput" placeholder="Type a message" type="text" />
     <button id="sendMessage">Send</button>
-
-    <input type="file" id="imageInput" style="margin-right: 5px;"/>
+    <br>
+    Select Image Below:
+    <input type="file" id="imageInput" />
     <button id="sendImage">Send Image</button>
+
+    <footer>
+        <p>&copy; 2024 Chat Application. All rights reserved.</p>
+    </footer>
+
 
     <script>
         const socket = io();
@@ -56,11 +194,11 @@
         };
 
         socket.on('userConnected', (username) => {
-            chatDiv.innerHTML += `<p style="margin: 0;">${username} has joined the chat.</p>`;
+            chatDiv.innerHTML += `<p>${username} has joined the chat.</p>`;
         });
 
         socket.on('userDisconnected', (username) => {
-            chatDiv.innerHTML += `<p style="margin: 0;">${username} has left the chat.</p>`;
+            chatDiv.innerHTML += `<p>${username} has left the chat.</p>`;
         });
 
         socket.on('chatHistory', (history) => {
@@ -102,19 +240,19 @@
         // Helper functions to generate HTML for messages and images
         function generateMessageHTML(username, message, avatar) {
             return `
-                <div class="message-container" style="display: flex; align-items: center; margin-bottom: 10px;">
-                    <img src="${avatar}" class="avatar" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;" />
-                    <span class="username" style="font-weight: bold; margin-right: 5px;">${username}:</span> ${message}
+                <div class="message-container">
+                    <img src="${avatar}" class="avatar" alt="Avatar" />
+                    <span class="username">${username}:</span> ${message}
                 </div>
             `;
         }
 
         function generateImageHTML(username, image, avatar) {
             return `
-                <div class="message-container" style="display: flex; align-items: center; margin-bottom: 10px;">
-                    <img src="${avatar}" class="avatar" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;" />
-                    <span class="username" style="font-weight: bold; margin-right: 5px;">${username}:</span> 
-                    <img src="${image}" style="width: 200px;" />
+                <div class="message-container">
+                    <img src="${avatar}" class="avatar" alt="Avatar" />
+                    <span class="username">${username}:</span> 
+                    <img src="${image}" width="200" />
                 </div>
             `;
         }
