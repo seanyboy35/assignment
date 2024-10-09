@@ -9,7 +9,7 @@
     <nav class="navbar">
       <ul>
         <li><a href="#" (click)="navigateTo('home')">Home Page</a></li>
-        <li><a href="#" (click)="navigateTo('chat')">Chat Page</a></li>
+        <li><a href="#" (click)="openChatPage()">Chat Page</a></li>
         <li><a href="#" (click)="navigateTo('group-management')">Group Management Page</a></li>
         <li><a href="#" (click)="navigateTo('user-management')">User Management Page</a></li>
         <li><a href="#" (click)="navigateTo('video-chat')">Video Chat Page</a></li>
@@ -115,7 +115,7 @@
      <!-- This section is only visible if the user is authenticated and the current section is 'chat' -->
 <section *ngIf="isAuthenticated && currentSection === 'chat'" class="chat-section">
   <h1>Chat Function</h1>
-  <div *ngIf="userRole === 'superAdmin'">
+  <div>
     <h3>Your Channels</h3>
     <div class="chat-container">
       <form (submit)="sendMessage(username, message)">

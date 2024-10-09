@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Chat with Avatar</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    Username:
+    <input id="usernameInput" placeholder="Enter your username" style="margin-bottom: 10px;"/><br />
+    Upload Profile Picture:
+    <input type="file" id="avatarInput" style="margin-bottom: 10px;"/><br />
+    Room Name:
+    <input id="roomInput" placeholder="Enter room name" style="margin-bottom: 10px;"/><br />
+    <button id="joinRoom" style="margin-bottom: 20px;">Join Room</button><br />
+
+    <div id="chat" style="margin-bottom: 20px;"></div>
+    
+    <input id="messageInput" placeholder="Type a message" style="margin-right: 5px;"/>
+    <button id="sendMessage">Send</button>
+
+    <input type="file" id="imageInput" style="margin-right: 5px;"/>
+    <button id="sendImage">Send Image</button>
+
+    <script>
+        const socket = io();
+        const chatDiv = document.getElementById('chat');
+        const usernameInput = document.getElementById('usernameInput');
+        const roomInput = document.getElementById('roomInput');
+        const messageInput = document.getElementById('messageInput');
+        const avatarInput = document.getElementById('avatarInput');
+        const imageInput = document.getElementById('imageInput');
+
+        let userAvatar = '';
+
+        // Convert avatar to Base64 and store it
+        avatarInput.addEventListener('change', () => {
+            const file = avatarInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = function () {
+                    userAvatar = reader.result; // Store the avatar as a Base64 string
+                };
+                reader.readAsDataURL(file); // Convert image to Base64
+            }
+        });
+
+        document.getElementById('joinRoom').onclick = () => {
+            const room = roomInput.value;
+            const username = usernameInput.value;
+            socket.emit('joinRoom', { room, username, avatar: userAvatar });
+            roomInput.value = '';
+            usernameInput.disabled = true; // Disable username input after joining
+            avatarInput.disabled = true; // Disable avatar input after joining
+        };
+
+        socket.on('userConnected', (username) => {
+            chatDiv.innerHTML += `<p style="margin: 0;">${username} has joined the chat.</p>`;
+        });
+
+        socket.on('userDisconnected', (username) => {
+            chatDiv.innerHTML += `<p style="margin: 0;">${username} has left the chat.</p>`;
+        });
+
+        socket.on('chatHistory', (history) => {
+            history.forEach(({ username, msg, image, avatar }) => {
+                if (msg) {
+                    chatDiv.innerHTML += generateMessageHTML(username, msg, avatar);
+                }
+                if (image) {
+                    chatDiv.innerHTML += generateImageHTML(username, image, avatar);
+                }
+            });
+        });
+
+        socket.on('message', ({ username, msg, avatar }) => {
+            chatDiv.innerHTML += generateMessageHTML(username, msg, avatar);
+        });
+
+        socket.on('image', ({ username, image, avatar }) => {
+            chatDiv.innerHTML += generateImageHTML(username, image, avatar);
+        });
+
+        document.getElementById('sendMessage').onclick = () => {
+            const msg = messageInput.value;
+            socket.emit('message', msg);
+            messageInput.value = '';
+        };
+
+        document.getElementById('sendImage').onclick = () => {
+            const file = imageInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = function () {
+                    socket.emit('image', reader.result); // Send the base64 image string
+                };
+                reader.readAsDataURL(file); // Convert image to Base64
+            }
+        };
+
+        // Helper functions to generate HTML for messages and images
+        function generateMessageHTML(username, message, avatar) {
+            return `
+                <div class="message-container" style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <img src="${avatar}" class="avatar" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;" />
+                    <span class="username" style="font-weight: bold; margin-right: 5px;">${username}:</span> ${message}
+                </div>
+            `;
+        }
+
+        function generateImageHTML(username, image, avatar) {
+            return `
+                <div class="message-container" style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <img src="${avatar}" class="avatar" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;" />
+                    <span class="username" style="font-weight: bold; margin-right: 5px;">${username}:</span> 
+                    <img src="${image}" style="width: 200px;" />
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

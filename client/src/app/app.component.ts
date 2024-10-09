@@ -748,6 +748,13 @@ demoteUser() {
       );
   }
 
+  openChatPage() {
+    // Open a new pop-up window
+    window.open('http://localhost:3001/', '_blank', 'width=800,height=600');
+    // Open chat
+    this.navigateTo('chat');
+  }
+
   ngOnInit(): void {
      
     this.getUserData(); // Call the method here to fetch user data on initialization
