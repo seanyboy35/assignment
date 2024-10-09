@@ -755,6 +755,11 @@ demoteUser() {
     this.navigateTo('chat');
   }
 
+  openVideoChatPage() {
+    window.open('http://localhost:4201/', '_blank', 'width=800,height=600');
+    this.navigateTo('chat');
+  }
+
   ngOnInit(): void {
      
     this.getUserData(); // Call the method here to fetch user data on initialization
