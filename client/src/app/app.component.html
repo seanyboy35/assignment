@@ -99,9 +99,9 @@
           <li *ngFor="let request of group.requests">
             {{ request }} requested to join {{ group.name }}
             <!-- Approve request button -->
-            <button (click)="approveRequest(group.name, request)">Approve</button>
+            <button (click)="approveRequest(request, group.name)">Approve</button>
             <!-- Deny request button -->
-            <button (click)="denyRequest(group.name, request)">Deny</button>
+            <button (click)="denyRequest(request, group.name)">Deny</button>
           </li>
         </ul>
       </div>
@@ -182,8 +182,8 @@
                 <ul>
                   <li *ngFor="let request of group.requests">
                     {{ request }}
-                    <button (click)="approveRequest(group.name, request)">Approve</button>
-                    <button (click)="denyRequest(group.name, request)">Deny</button>
+                    <button (click)="approveRequest(request, group.name)">Approve</button>
+                    <button (click)="denyRequest(request, group.name)">Deny</button>
                   </li>
                 </ul>
               </div>

@@ -166,6 +166,28 @@ app.post('/api/groups/approve-request', async (req, res) => {
   }
 });
 
+app.post('/api/groups/remove-from-requests', async (req, res) => {
+  const { username, groupName } = req.body;
+
+  try {
+      // Use $pull to remove the username from the requests array
+      const updatedGroup = await Group.findOneAndUpdate(
+          { name: groupName },
+          { $pull: { requests: username } },
+          { new: true }
+      );
+
+      if (!updatedGroup) {
+          return res.status(404).json({ message: 'Group not found' });
+      }
+
+      res.status(200).json({ message: 'Username removed from requests array', updatedGroup });
+  } catch (error) {
+      console.error('Error removing username from requests:', error);
+      res.status(500).json({ message: 'An error occurred', error });
+  }
+});
+
 app.post('/api/channels/join', async (req, res) => {
   try {
       const { username, channelId } = req.body;

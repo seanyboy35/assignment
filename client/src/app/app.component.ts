@@ -116,9 +116,30 @@ export class AppComponent implements OnInit {
       response => {
         console.log('Request approved!', response); // Log the response
         // Handle successful approval, e.g., show a message or refresh the list of requests
+        // Remove the approved request from the group.requests array
+        const group = this.groups.find(g => g.name === groupName);
+        if (group) {
+          group.requests = group.requests.filter(request => request !== username);
+        }
       },
       error => {
         console.error('Error approving request', error); // Log the error
+        // Handle the error, e.g., show an error message
+      }
+    );
+
+    this.http.post(`http://localhost:3000/api/groups/remove-from-requests`, payload).subscribe(
+      response => {
+        console.log('deleted user!', response); // Log the response
+        // Handle successful approval, e.g., show a message or refresh the list of requests
+        // Remove the approved request from the group.requests array
+        const group = this.groups.find(g => g.name === groupName);
+        if (group) {
+          group.requests = group.requests.filter(request => request !== username);
+        }
+      },
+      error => {
+        console.error('Error deleting user', error); // Log the error
         // Handle the error, e.g., show an error message
       }
     );
@@ -148,7 +169,15 @@ getUserData() {
   console.log('Fetching user data for userId:', userId); // Debugging log
   if (userId) {
     this.http.get<User>(`http://localhost:3000/users/${userId}`)
-      
+      .subscribe(
+        (user) => {
+          console.log('User data retrieved:', user); // For debugging
+          this.userRole = user.role; // Set the user role from the response
+        },
+        (error) => {
+          console.error('Error retrieving user data:', error);
+        }
+      );
   } else {
     console.warn('User ID is not found in local storage.');
   }
@@ -474,12 +503,26 @@ joinGroupRequest(groupName: string) {
       });
   }
 
-  denyRequest(groupName: string, username: string) {
-    const group = this.groups.find(g => g.name === groupName);
-    if (group) {
-      group.requests = group.requests.filter(r => r !== username);
-      console.log('Denied request for user:', username, 'to join group:', groupName);
-    }
+  denyRequest(username: string, groupName: string) {
+    
+    const payload = { username, groupName }; // Create the payload object
+    console.log(payload); // Ensure this is correctly set
+  
+    this.http.post(`http://localhost:3000/api/groups/remove-from-requests`, payload).subscribe(
+      response => {
+        console.log('deleted user!', response); // Log the response
+        // Handle successful approval, e.g., show a message or refresh the list of requests
+        // Remove the approved request from the group.requests array
+        const group = this.groups.find(g => g.name === groupName);
+        if (group) {
+          group.requests = group.requests.filter(request => request !== username);
+        }
+      },
+      error => {
+        console.error('Error deleting user', error); // Log the error
+        // Handle the error, e.g., show an error message
+      }
+    );
   }
 
   removeMember(groupName: string, username: string) {
