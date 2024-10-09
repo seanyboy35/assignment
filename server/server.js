@@ -414,6 +414,26 @@ app.delete('/api/channels/delete/:channelId', async (req, res) => {
   }
 });
 
+// API route to get all users with their username and role
+app.get('/api/users', async (req, res) => {
+  try {
+      // Find all users and return only 'username' and 'role' fields
+      const users = await User.find({}, 'username role');
 
+      // If no users are found
+      if (!users || users.length === 0) {
+          return res.status(404).json({ message: 'No users found' });
+      }
+
+      // Return the users as a JSON response
+      res.status(200).json(users);
+  } catch (err) {
+      // Log any error and return a 500 status
+      console.error('Error retrieving users:', err);
+      res.status(500).json({ error: 'Failed to retrieve users' });
+  }
+});
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+

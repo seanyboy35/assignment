@@ -755,7 +755,16 @@ demoteUser() {
     this.getChannels(); 
     this.fetchGroups(); // Fetch the list of groups when the component initializes
     
-    
+    // Fetch users when the component is initialized
+    this.http.get<any[]>('http://localhost:3000/api/users').subscribe(
+      (data) => {
+        this.users = data;
+      },
+      (error) => {
+        console.error('Error fetching users', error);
+      }
+    );
+
     // Listen for incoming messages from the server
     this.socketService.getMessages().subscribe(
       (msg: { username: string; message: string; }) => {

@@ -222,7 +222,25 @@
     <button (click)="promoteUser()">Promote User</button>
     <button (click)="demoteUser()">Demote User</button>
     <ul>
-      <li *ngFor="let user of users">{{ user.username }} ({{ user.role }})</li>
+      <div>
+        <br>
+        <h2>User List</h2>
+        <br>
+        <table border="1" style="border-collapse: collapse; width: 50%;">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users">
+              <td>{{ user.username }}</td>
+              <td>{{ user.role }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </ul>
   </div>
 </section>
