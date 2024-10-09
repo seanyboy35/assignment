@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true },
   email: { type: String, required: true, unique: true }, // Ensure email is unique as well
   password: { type: String, required: true },
-  role: { type: String, required: true },
+  role: { type: String, enum: ['chatUser', 'groupAdmin', 'superAdmin'], required: true },
   groups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],  // Groups the user belongs to
   channels: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Channel' }]  // Channels the user belongs to
 });

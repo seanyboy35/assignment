@@ -622,36 +622,53 @@ createUser() {
 }
 
 
-  promoteUser() {
-    const usernameToPromote = prompt('Enter the username to promote:');
-    if (usernameToPromote) {
-      const userToPromote = this.users.find(user => user.username === usernameToPromote);
-      if (userToPromote) {
-        if (userToPromote.role === 'chatUser') {
-          userToPromote.role = 'groupAdmin';
-          console.log('User promoted from ChatUser to GroupAdmin:', usernameToPromote);
-        } else if (userToPromote.role === 'groupAdmin') {
-          userToPromote.role = 'superAdmin';
-          console.log('User promoted from GroupAdmin to SuperAdmin:', usernameToPromote);
-        }
-      }
-    }
+promoteUser() {
+  const usernameToPromote = prompt('Enter the username to promote:'); // Prompt for username
+
+  console.log('Promote User button clicked');
+  console.log('Username to promote:', usernameToPromote);
+
+  if (usernameToPromote) {
+      this.http.patch(`http://localhost:3000/api/users/promote/${usernameToPromote}`, {}).subscribe(
+          (response: any) => {
+              console.log('Response from promote:', response);
+              alert(`User ${usernameToPromote} has been promoted.`);
+              // Optional: refresh the user list or update the UI accordingly
+          },
+          (error: any) => {
+              console.error('Error promoting user:', error);
+              alert(`User is already at it highest Role.`);
+          }
+      );
+  } else {
+      console.error('No username entered');
+      alert('Please enter a username to promote.');
   }
-  demoteUser() {
-    const usernameToDemote = prompt('Enter the username to demote:');
-    if (usernameToDemote) {
-      const userToDemote = this.users.find(user => user.username === usernameToDemote);
-      if (userToDemote) {
-        if (userToDemote.role === 'superAdmin') {
-          userToDemote.role = 'groupAdmin';
-          console.log('User Demoted', usernameToDemote);
-        } else if (userToDemote.role === 'groupAdmin') {
-          userToDemote.role = 'chatUser';
-          console.log('User Demoted:', usernameToDemote);
-        }
-      }
-    }
+}
+
+demoteUser() {
+  const usernameToDemote = prompt('Enter the username to demote:'); // Prompt for username
+
+  console.log('Demote User button clicked');
+  console.log('Username to demote:', usernameToDemote);
+
+  if (usernameToDemote) {
+      this.http.patch(`http://localhost:3000/api/users/demote/${usernameToDemote}`, {}).subscribe(
+          (response: any) => {
+              console.log('Response from demote:', response);
+              alert(`User ${usernameToDemote} has been demoted.`);
+              // Optional: refresh the user list or update the UI accordingly
+          },
+          (error: any) => {
+              console.error('Error demoting user:', error);
+              alert(`User is already at the lowest Role.`);
+          }
+      );
+  } else {
+      console.error('No username entered');
+      alert('Please enter a username to demote.');
   }
+}
 
   register() {
     const newUsername = prompt('Enter a new username:');
@@ -679,7 +696,7 @@ createUser() {
             },
             (error) => {
                 console.error('Error registering user:', error);
-                alert('Username already in use');
+                alert('User already exists.');
             }
         );
     }

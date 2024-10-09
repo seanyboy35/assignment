@@ -296,6 +296,71 @@ router.delete('/api/users/deleteUser/:username', async (req, res) => {
   }
 });
 
+router.patch('/api/users/promote/:username', async (req, res) => {
+  const { username } = req.params;
 
+  try {
+      // Find the user by username
+      const user = await User.findOne({ username });
+
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Define the role hierarchy
+      const roles = ['chatUser', 'groupAdmin', 'superAdmin'];
+
+      // Get the current role index
+      const currentRoleIndex = roles.indexOf(user.role);
+
+      // Promote the user if not already at the highest role
+      if (currentRoleIndex < roles.length - 1) {
+          user.role = roles[currentRoleIndex + 1];
+          await user.save();
+          return res.status(200).json({ message: `User ${username} promoted to ${user.role}` });
+      } else {
+          return res.status(400).json({ message: 'User is already at the highest role' });
+      }
+  } catch (error) {
+      console.error('Error promoting user:', error);
+      return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// PATCH method to demote a user account
+router.patch('/api/users/demote/:username', async (req, res) => {
+  const username = req.params.username;
+
+  try {
+      // Fetch the user by username
+      const user = await User.findOne({ username: username });
+      
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Determine the current role and update to the next lower role
+      const roles = ['chatUser', 'groupAdmin', 'superAdmin'];
+      const currentRoleIndex = roles.indexOf(user.role);
+
+      if (currentRoleIndex === -1) {
+          return res.status(400).json({ message: 'Invalid role' });
+      }
+
+      // If the current role is the lowest, return an error
+      if (currentRoleIndex === 0) {
+          return res.status(400).json({ message: 'User is already at the lowest role' });
+      }
+
+      // Update the user's role to the next lower role
+      user.role = roles[currentRoleIndex - 1];
+      await user.save();
+
+      res.status(200).json({ message: `User ${username} demoted to ${user.role}` });
+  } catch (error) {
+      console.error('Error demoting user:', error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 module.exports = router; // Export the router
