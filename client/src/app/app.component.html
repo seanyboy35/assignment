@@ -215,7 +215,7 @@
 <section *ngIf="isAuthenticated && currentSection === 'user-management'" class="user-management-section">
   <h1>User Management</h1>
   <div *ngIf="userRole === 'superAdmin'">
-    <button (click)="createUser()">Create User</button>
+    <button (click)="register()">Create User</button>
     <button (click)="deleteUser()">Delete User</button>
     <button (click)="promoteUser()">Promote User</button>
     <button (click)="demoteUser()">Demote User</button>

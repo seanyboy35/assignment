@@ -259,6 +259,43 @@ router.delete('/api/users/deleteAccount/:userId', async (req, res) => {
   }
 });
 
+// DELETE method to delete a user account based on username
+router.delete('/api/users/deleteUser/:username', async (req, res) => {
+  const username = req.params.username;
+
+  try {
+      // Find the user by username to get their userId
+      const user = await User.findOne({ username: username });
+      
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+
+      const userId = user._id; // Get userId from the user document
+
+      // Remove user from Group and Channel references
+      await Group.updateMany({ 
+          $or: [{ memberIds: userId }, { admins: userId }] 
+      }, {
+          $pull: { memberIds: userId, admins: userId }
+      });
+
+      await Channel.updateMany({ 
+          members: userId 
+      }, {
+          $pull: { members: userId }
+      });
+
+      // Delete the user
+      await User.findByIdAndDelete(userId);
+      
+      res.status(200).json({ message: 'User account deleted successfully' });
+  } catch (error) {
+      console.error('Error deleting account:', error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 
 module.exports = router; // Export the router

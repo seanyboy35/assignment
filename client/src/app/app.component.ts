@@ -485,6 +485,32 @@ joinGroupRequest(groupName: string) {
         console.error('No user ID found in localStorage');
     }
 }
+
+deleteUser() {
+  const usernameToDelete = prompt('Enter the username to delete:');
+
+  console.log('Username to delete:', usernameToDelete);
+
+  if (usernameToDelete) {
+      // Replace the placeholder with the actual username
+      this.http.delete(`http://localhost:3000/api/users/deleteUser/${usernameToDelete}`).subscribe(
+          (response: any) => {
+              console.log('Response from deleteAccount:', response);
+              alert(`User ${usernameToDelete} has been deleted successfully.`);
+              // Refresh the page after a successful delete
+              location.reload();
+          },
+          (error: any) => {
+              console.error('Error deleting account:', error);
+              alert(`Error deleting user: ${usernameToDelete}. Please try again.`);
+          }
+      );
+  } else {
+      console.error('No username entered');
+      alert('Please enter a username to delete.');
+  }
+}
+
   
   approveUser(username: string, groupName: string) {
     // Assuming you have an array to hold approved users
@@ -595,13 +621,6 @@ createUser() {
   }
 }
 
-  deleteUser() {
-    const usernameToDelete = prompt('Enter the username to delete:');
-    if (usernameToDelete) {
-      this.users = this.users.filter(user => user.username !== usernameToDelete);
-      console.log('User deleted:', usernameToDelete);
-    }
-  }
 
   promoteUser() {
     const usernameToPromote = prompt('Enter the username to promote:');
