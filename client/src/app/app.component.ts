@@ -679,6 +679,7 @@ createUser() {
             },
             (error) => {
                 console.error('Error registering user:', error);
+                alert('Username already in use');
             }
         );
     }
